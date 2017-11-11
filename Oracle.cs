@@ -1,4 +1,6 @@
 
+using League;
+
 public enum MutationStrategy {
     Aggressive,
     Normal,
@@ -8,17 +10,17 @@ public enum MutationStrategy {
 
 //this will be our representation of a single evolved algorithm, calculator, or 'oracle'
 public class Oracle<ResultType, StatementType> {
-    private StatementType prophecy;
-    private DSLInterpreter calculator;
+    private LeagueStatement prophecy;
+    private LeagueInterpreter calculator; //todo make this generically any kind of interpreter
 
-    public Oracle (StatementType prophecy, DSLInterpreter calculator) {
+    public Oracle (LeagueStatement prophecy, LeagueInterpreter calculator) {
         this.prophecy = prophecy;
         this.calculator = calculator;
     }
 
-    public ResultType prophesize() {
+    public double prophesize() {
         //in this function we will need to run through the prophecy instructions and compute our prediction
-        calculator.interpret(prophecy);
+        return calculator.interpret(prophecy);
     }
 
     //this function will mutate the oracle's list of prophecies, and create a new oracle

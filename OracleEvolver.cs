@@ -1,12 +1,18 @@
+﻿using System;
+using League;
 
-public class LeagueOracleEvolver {
-    private LeagueStatement seed = new Const();
-    
-    public LeagueOracleEvolver() {
-        seed.val = 1;
-    }
+namespace OracleEvolver
+{
+    public class OracleEvolver {
+        private Const seed = new Const();
+        
+        public OracleEvolver() {
+            seed.value = 1;
+        }
 
-    public void evolve() {
-        //loop (forever?) and evolve oracles
+        public static void Main() {
+            Console.WriteLine("Beginning evolution!");
+            //loop (forever?) and evolve oracles
+        }
     }
- }
+}

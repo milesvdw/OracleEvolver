@@ -1,3 +1,10 @@
 C:\Users\miles.vandewetering\Source\Repos\OracleEvolver\obj\Debug\netcoreapp2.0\OracleEvolver.csproj.CoreCompileInputs.cache
 C:\Users\miles.vandewetering\Source\Repos\OracleEvolver\obj\Debug\netcoreapp2.0\OracleEvolver.AssemblyInfoInputs.cache
 C:\Users\miles.vandewetering\Source\Repos\OracleEvolver\obj\Debug\netcoreapp2.0\OracleEvolver.AssemblyInfo.cs
+C:\Users\miles.vandewetering\Source\Repos\OracleEvolver\bin\Debug\netcoreapp2.0\OracleEvolver.deps.json
+C:\Users\miles.vandewetering\Source\Repos\OracleEvolver\bin\Debug\netcoreapp2.0\OracleEvolver.runtimeconfig.json
+C:\Users\miles.vandewetering\Source\Repos\OracleEvolver\bin\Debug\netcoreapp2.0\OracleEvolver.runtimeconfig.dev.json
+C:\Users\miles.vandewetering\Source\Repos\OracleEvolver\bin\Debug\netcoreapp2.0\OracleEvolver.dll
+C:\Users\miles.vandewetering\Source\Repos\OracleEvolver\bin\Debug\netcoreapp2.0\OracleEvolver.pdb
+C:\Users\miles.vandewetering\Source\Repos\OracleEvolver\obj\Debug\netcoreapp2.0\OracleEvolver.dll
+C:\Users\miles.vandewetering\Source\Repos\OracleEvolver\obj\Debug\netcoreapp2.0\OracleEvolver.pdb

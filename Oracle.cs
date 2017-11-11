@@ -21,6 +21,8 @@ namespace OracleEvolver {
         public double fitness; //for now, this will simply be the percent of games correctly predicted
         private Random rand = new Random();
         private double DELETION_CHANCE = .2;
+        private int MAX_CONST = -1000;
+        private int MIN_CONST = 1000;
 
         public Oracle (LeagueStatement prophecy) {
             this.prophecy = prophecy;
@@ -53,7 +55,7 @@ namespace OracleEvolver {
             return new Oracle(prophecy);
         }
 
-        private LeagueStatement mutateExpressionTree(LeagueStatement expression, double mutationChance) {]
+        private LeagueStatement mutateExpressionTree(LeagueStatement expression, double mutationChance) {
             //this is the biggest sticking point in terms of generalizing the approach. How do you
             //generalize mutation??
             double roll = rand.Next(0, 100)/100;
@@ -85,13 +87,15 @@ namespace OracleEvolver {
                     if(roll == 1) (newExpression as BinaryMathOp).left = (expression as UnaryMathOp).inner;
                     else (newExpression as BinaryMathOp).right = (expression as UnaryMathOp).inner;
                 }
-            } else {
+            } else if(newExpression is UnaryMathOp) {
                 if(expression is UnaryMathOp) (newExpression as UnaryMathOp).inner = (expression as UnaryMathOp).inner;
                 else {
                     roll = rand.Next(0, 1);
                     if(roll == 1) (newExpression as UnaryMathOp).inner = (expression as BinaryMathOp).left;
                     else (newExpression as UnaryMathOp).inner = (expression as BinaryMathOp).right;
                 }
+            } else if(newExpression is Const) {
+                (newExpression as Const).value = rand.Next(MIN_CONST, MAX_CONST);
             }
             return newExpression;
 

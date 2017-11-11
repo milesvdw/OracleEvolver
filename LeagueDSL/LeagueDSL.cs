@@ -50,11 +50,12 @@ namespace League {
         }
     }
 
-    public class Const : UnaryMathOp { //not totally sure this is right
+    public class Const : MathOp { //not totally sure this is right
         public Const(double value)
         {
-            this.inner = inner;
+            this.value = value;
         }
+        public double value;
     }
 
     public class If : LeagueStatement {

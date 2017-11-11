@@ -32,7 +32,6 @@ public struct If : LeagueStatement {
     public Bool condition;
     public Bool left;
     public Bool right;
-    public 
 }
 
 public struct Bool {

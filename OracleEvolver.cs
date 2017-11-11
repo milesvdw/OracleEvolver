@@ -7,6 +7,11 @@ namespace OracleEvolver
         private static Const seed = new Const(1);
 
         public static void Main() {
+            evolve();
+            LeagueInterpreter.RunTests();
+        }
+
+        public static void evolve() {
             seed.value = 5;
             Console.WriteLine("Beginning evolution!");
             Console.WriteLine("Seed Statement: ");

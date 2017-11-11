@@ -11,16 +11,14 @@ public enum MutationStrategy {
 //this will be our representation of a single evolved algorithm, calculator, or 'oracle'
 public class Oracle<ResultType, StatementType> {
     private LeagueStatement prophecy;
-    private LeagueInterpreter calculator; //todo make this generically any kind of interpreter
 
-    public Oracle (LeagueStatement prophecy, LeagueInterpreter calculator) {
+    public Oracle (LeagueStatement prophecy) {
         this.prophecy = prophecy;
-        this.calculator = calculator;
     }
 
     public double prophesize() {
         //in this function we will need to run through the prophecy instructions and compute our prediction
-        return calculator.interpret(prophecy);
+        return LeagueInterpreter.interpret(prophecy);
     }
 
     //this function will mutate the oracle's list of prophecies, and create a new oracle
@@ -28,9 +26,9 @@ public class Oracle<ResultType, StatementType> {
         //for now, we don't do any real mutation
         switch(strategy) {
             case MutationStrategy.Equilibrium:
-                return new Oracle<ResultType, StatementType>(prophecy, calculator);
+                return new Oracle<ResultType, StatementType>(prophecy);
         }
-        return new Oracle<ResultType, StatementType>(prophecy, calculator);
+        return new Oracle<ResultType, StatementType>(prophecy);
             
         
     }

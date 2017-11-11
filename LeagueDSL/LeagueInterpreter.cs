@@ -1,15 +1,15 @@
 using System;
 
 namespace League {
-    public class LeagueInterpreter {
-        public double interpret(LeagueStatement statement) {
+    public static class LeagueInterpreter {
+        public static double interpret(LeagueStatement statement) {
             if(statement is MathOp) return interpretMath(statement as MathOp);
             if(statement is If) return interpretIf(statement as If);
             if(statement is Const) return (statement as Const).value;
             return 0;
         }
 
-        private double interpretMath(MathOp statement) {
+        private static double interpretMath(MathOp statement) {
             if(statement is Add)
                     return interpret((statement as Add).left) + interpret((statement as Add).right);
             if(statement is Subtract)
@@ -24,12 +24,12 @@ namespace League {
             return 0; // throw exception?
         }
 
-        private double interpretIf(If statement) {
+        private static double interpretIf(If statement) {
             if(interpretBool(statement.condition)) return interpret(statement.left);
             else return interpret(statement.right);
         }
 
-        private bool interpretBool(Bool condition) {
+        private static bool interpretBool(Bool condition) {
             if(condition is Not) {
                 return !interpretBool((condition as Not).inner);
             }
@@ -45,29 +45,40 @@ namespace League {
             return false; //throw an error?
         }
 
+        public static void RunTests() {
+            RunMathTests();
+        }
+
+        public static void RunMathTests() {
+            TestAdd();
+            TestMultiply();
+            TestSubtract();
+            TestDivide();
+        }
+
         //unit tests: expand these, or move to a framework perhaps?
-        private void TestAdd() {
+        private static void TestAdd() {
             Add add = new Add(new Const(5), new Const(10));
 
             double result = interpret(add);
             if(result == 15) Console.WriteLine("Test Passed: TestAdd");
             else Console.WriteLine("Test Failed: TestAdd");
         }
-        private void TestSubtract() {
+        private static void TestSubtract() {
             Subtract sub  = new Subtract(new Const(5), new Const(10));
 
             double result = interpret(sub);
             if(result == -5) Console.WriteLine("Test Passed: TestSub");
             else Console.WriteLine("Test Failed: TestSub");
         }
-        private void TestMultiply() {
+        private static void TestMultiply() {
             Multiply mult = new Multiply(new Const(5), new Const(10));
 
             double result = interpret(mult);
             if(result == 50) Console.WriteLine("Test Passed: TestMult");
             else Console.WriteLine("Test Failed: TestMult");
         }
-        private void TestDivide() {
+        private static void TestDivide() {
             Divide div = new Divide(new Const(5), new Const(10));
 
             double result = interpret(div);

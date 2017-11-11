@@ -3,7 +3,13 @@ using System;
 namespace League {
     
     public static class LeaguePrinter {
+
         public static void print(LeagueStatement statement) {
+            printStatement(statement);
+            Console.WriteLine("\n");
+        }
+
+        public static void printStatement(LeagueStatement statement) {
             Console.Write("<");
             if(statement is MathOp) {
                 printMath(statement as MathOp);
@@ -27,15 +33,15 @@ namespace League {
 
         private static void printBinaryOp(string op, LeagueStatement left, LeagueStatement right) {
             Console.Write(op + " ");
-            print(left);
+            printStatement(left);
             Console.Write(" ");
-            print(right);
+            printStatement(right);
         }
 
         private static void printIf(If statement) {
             Console.Write("If");
-            print(statement.left);
-            print(statement.right);
+            printStatement(statement.left);
+            printStatement(statement.right);
         }
 
     }

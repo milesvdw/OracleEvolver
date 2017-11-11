@@ -20,6 +20,9 @@ public struct LeagueStatement {
     public StatementType LeagueStatementType;
 }
 
+public struct Const : LeagueStatement {
+    public double value;
+}
 
 public struct MathOp : LeagueStatement {
     public MathOpType type;

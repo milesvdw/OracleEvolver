@@ -2,11 +2,11 @@ public class DSLInterpreter<ResultType, Statement> {
     public virtual ResultType interpret(Statement statement);
 }
 
-
-public class LeagueInterpreter : DSLInterpreter<int, LeagueStatement> {
-    public int interpret(LeagueStatement statement) {
+public class LeagueInterpreter : DSLInterpreter<double, LeagueStatement> {
+    public double interpret(LeagueStatement statement) {
         if(statement is MathOp) return interpretMath(statement);
         if(statement is If) return interpretIf(statement);
+        if(statement is Const) return statement;
     }
 
     public double interpretMath(MathOp statement) {
@@ -45,13 +45,40 @@ public class LeagueInterpreter : DSLInterpreter<int, LeagueStatement> {
 
     //unit tests: expand these, or move to a framework perhaps?
     private TestAdd() {
-        LeagueStatement add = new MathOp();
+        LeagueStatement add = new Add();
         add.left = 5;
         add.right = 10;
 
-        int result = interpret(add);
+        double result = interpret(add);
         if(result == 15) Console.WriteLine("Test Passed: TestAdd");
         else Console.WriteLine("Test Failed: TestAdd");
+    }
+    private TestSubtract() {
+        LeagueStatement sub  = new Subtract();
+        sub.left = 5;
+        sub.right = 10;
+
+        double result = interpret(sub);
+        if(result == -5) Console.WriteLine("Test Passed: TestSub");
+        else Console.WriteLine("Test Failed: TestSub");
+    }
+    private TestMultiply() {
+        LeagueStatement mult = new Multiply();
+        mult.left = 5;
+        mult.right = 10;
+
+        double result = interpret(mult);
+        if(result == 50) Console.WriteLine("Test Passed: TestMult");
+        else Console.WriteLine("Test Failed: TestMult");
+    }
+    private TestDivide() {
+        LeagueStatement div = new Divide();
+        div.left = 5;
+        div.right = 10;
+
+        double result = interpret(div);
+        if(result == .5) Console.WriteLine("Test Passed: TestDivide");
+        else Console.WriteLine("Test Failed: TestDivide");
     }
 
 

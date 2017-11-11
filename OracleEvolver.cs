@@ -6,7 +6,7 @@ namespace OracleEvolver
 {
     public static class OracleEvolverProgram {
         private static Const seed = new Const(1);
-        private static List<Oracle<LeagueStatement>> oracles = new List<Oracle<LeagueStatement>>();
+        private static List<Oracle> oracles = new List<Oracle>();
         private const int GENERATIONS = 100;
         private const int POPULATION = 100;
         private static int current_generation;
@@ -23,7 +23,7 @@ namespace OracleEvolver
         
         public static void seedPopulation() {
             for(int i = 0; i < POPULATION; i ++) {
-                oracles.Add(new Oracle<LeagueStatement>(new Const(1)));
+                oracles.Add(new Oracle(new Const(1)));
             }
         }
 
@@ -31,7 +31,7 @@ namespace OracleEvolver
             Console.Write("\n Current Generation: ");
             Console.WriteLine(current_generation);
             Console.WriteLine("-------------------");
-            foreach(Oracle<LeagueStatement> oracle in oracles) {
+            foreach(Oracle oracle in oracles) {
                 Console.Write("FS: ");
                 Console.Write(oracle.fitness);
                 Console.Write(" :=");
@@ -40,21 +40,21 @@ namespace OracleEvolver
         }
 
         public static void mutateOracles() {
-            List<Oracle<LeagueStatement>> newOracles = new List<Oracle<LeagueStatement>>();
-            foreach(Oracle<LeagueStatement> oracle in oracles) {
+            List<Oracle> newOracles = new List<Oracle>();
+            foreach(Oracle oracle in oracles) {
                 newOracles.Add(oracle.spawnMutant(STRATEGY));
             }
             oracles.AddRange(newOracles);
         }
 
         public static void testOraclesFitness() {
-            foreach(Oracle<LeagueStatement> oracle in oracles) {
+            foreach(Oracle oracle in oracles) {
                 oracle.testFitness();
             }
         }
 
         public static void pruneOracles() {
-            oracles.Sort(delegate(Oracle<LeagueStatement> oracle1, Oracle<LeagueStatement> oracle2) {
+            oracles.Sort(delegate(Oracle oracle1, Oracle oracle2) {
                 return oracle1.fitness.CompareTo(oracle2.fitness);
             });
             oracles.RemoveRange(0, 100);
@@ -74,9 +74,6 @@ namespace OracleEvolver
                     pruneOracles();
                 }
             }
-            
-            
-            //loop (forever?) and evolve oracles
         }
     }
 }

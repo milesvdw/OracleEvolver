@@ -25,13 +25,10 @@ public struct MathOp : LeagueStatement {
     public MathOpType type;
     public int left;
     public int right;
-
-    public MathOp() {};
 }
 
 public struct If : LeagueStatement {
     public StatementType LeagueStatementType = StatementType.MathOp;
-    public BoolOpType type;
     public Bool condition;
     public Bool left;
     public Bool right;

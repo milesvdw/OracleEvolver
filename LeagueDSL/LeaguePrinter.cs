@@ -6,7 +6,7 @@ namespace League {
 
         public static void print(LeagueStatement statement) {
             printStatement(statement);
-            Console.WriteLine("\n");
+            Console.WriteLine("");
         }
 
         public static void printStatement(LeagueStatement statement) {

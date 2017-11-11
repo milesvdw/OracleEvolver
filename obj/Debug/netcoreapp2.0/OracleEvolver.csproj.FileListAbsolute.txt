@@ -1,0 +1,3 @@
+C:\Users\miles.vandewetering\Source\Repos\OracleEvolver\obj\Debug\netcoreapp2.0\OracleEvolver.csproj.CoreCompileInputs.cache
+C:\Users\miles.vandewetering\Source\Repos\OracleEvolver\obj\Debug\netcoreapp2.0\OracleEvolver.AssemblyInfoInputs.cache
+C:\Users\miles.vandewetering\Source\Repos\OracleEvolver\obj\Debug\netcoreapp2.0\OracleEvolver.AssemblyInfo.cs

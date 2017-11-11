@@ -74,26 +74,14 @@ namespace OracleEvolver {
             return expression; //unsupported expression type?
         }
 
-        LeagueStatement mutateMathExpression(LeagueStatement expression) {
+        LeagueStatement mutateMathExpression(MathOp expression) {
             double roll = rand.Next(0, 100) / 100;
 
             MathOp newExpression = mathOps[(int)(roll*mathOps.Length)];
             if(newExpression is BinaryMathOp) {
-                if(expression is BinaryMathOp) {
-                    (newExpression as BinaryMathOp).left = (expression as BinaryMathOp).left;
-                    (newExpression as BinaryMathOp).right = (expression as BinaryMathOp).right;
-                } else {
-                    roll = rand.Next(0, 1);
-                    if(roll == 1) (newExpression as BinaryMathOp).left = (expression as UnaryMathOp).inner;
-                    else (newExpression as BinaryMathOp).right = (expression as UnaryMathOp).inner;
-                }
+                newExpression = getNewBinaryMathOp(expression);
             } else if(newExpression is UnaryMathOp) {
-                if(expression is UnaryMathOp) (newExpression as UnaryMathOp).inner = (expression as UnaryMathOp).inner;
-                else {
-                    roll = rand.Next(0, 1);
-                    if(roll == 1) (newExpression as UnaryMathOp).inner = (expression as BinaryMathOp).left;
-                    else (newExpression as UnaryMathOp).inner = (expression as BinaryMathOp).right;
-                }
+                newExpression = getNewUnaryMathOp(expression);
             } else if(newExpression is Const) {
                 (newExpression as Const).value = rand.Next(MIN_CONST, MAX_CONST);
             }
@@ -101,7 +89,34 @@ namespace OracleEvolver {
 
         }
 
-        private LeagueStatement mutateIfExpression(LeagueStatement expression) {
+        private BinaryMathOp getNewBinaryMathOp(MathOp expression) {
+            double roll = rand.Next(0, 100) / 100;
+            BinaryMathOp newExpression = new BinaryMathOp();
+            if(expression is BinaryMathOp) {
+                (newExpression).left = (expression as BinaryMathOp).left;
+                (newExpression as BinaryMathOp).right = (expression as BinaryMathOp).right;
+            } else {
+                roll = rand.Next(0, 1);
+                if(roll == 1) (newExpression).left = (expression as UnaryMathOp).inner;
+                else (newExpression).right = (expression as UnaryMathOp).inner;
+            }
+            return newExpression;
+        }
+
+        private UnaryMathOp getNewUnaryMathOp(MathOp expression) {
+            double roll = rand.Next(0, 100) / 100;
+            UnaryMathOp newExpression = new UnaryMathOp();
+            if(expression is UnaryMathOp) (newExpression as UnaryMathOp).inner = (expression as UnaryMathOp).inner;
+            else {
+                roll = rand.Next(0, 1);
+                if(roll == 1) (newExpression as UnaryMathOp).inner = (expression as BinaryMathOp).left;
+                else (newExpression as UnaryMathOp).inner = (expression as BinaryMathOp).right;
+            }
+            return newExpression;
+        }
+
+        private LeagueStatement mutateIfExpression(If expression) {
+            //expression.left = mutate
             return expression; //todo mutate
         }
 

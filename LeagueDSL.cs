@@ -23,28 +23,58 @@ public class MathOp : LeagueStatement {
 }
 
 public class Add : MathOp {
+    public Add(MathOp left, MathOp right)
+    {
+        this.left = left;
+        this.right = right;
+    }
     public MathOp left;
     public MathOp right;
 }
 
 public class Subtract : MathOp {
+    public Subtract(MathOp left, MathOp right)
+    {
+        this.left = left;
+        this.right = right;
+    }
     public MathOp left;
     public MathOp right;
 }
 public class Divide : MathOp {
+    public Divide(MathOp left, MathOp right)
+    {
+        this.left = left;
+        this.right = right;
+    }
     public MathOp left;
     public MathOp right;
 }
 public class Multiply : MathOp {
+    public Multiply(MathOp left, MathOp right)
+    {
+        this.left = left;
+        this.right = right;
+    }
     public MathOp left;
     public MathOp right;
 }
 
 public class Const : MathOp { //not totally sure this is right
+    public Const(double value)
+    {
+        this.value = value;
+    }
     public double value;
 }
 
 public class If : LeagueStatement {
+    public If(Bool condition, LeagueStatement left, LeagueStatement right)
+    {
+        this.condition = condition;
+        this.left = left;
+        this.right = right;
+    }
     public Bool condition;
     public LeagueStatement left;
     public LeagueStatement right;
@@ -55,20 +85,39 @@ public class Bool {
 }
 
 public class And : Bool {
+    public And(Bool left, Bool right)
+    {
+        this.left = left;
+        this.right = right;
+    }
     public Bool left;
     public Bool right;
 }
 
 public class Or : Bool {
+    public Or(Bool left, Bool right)
+    {
+        this.left = left;
+        this.right = right;
+    }
     public Bool left;
     public Bool right;
 }
 
 public class Not : Bool {
+    public Not(Bool inner)
+    {
+        this.inner = inner;
+    }
     public Bool inner;
 }
 
 public class AreEqual : Bool {
+    public AreEqual(LeagueStatement left, LeagueStatement right)
+    {
+        this.left = left;
+        this.right = right;
+    }
     public LeagueStatement right; //todo: these really shouldn't be just any kind of statement; rather they should be a value (not a boolean)
     public LeagueStatement left; 
 }
@@ -85,23 +134,22 @@ public static class LeaguePrinter {
 
     private static void printMath(MathOp statement) {
         if(statement is Add)
-                printBinaryOp("Add", (statement as Add).left.ToString(), (statement as Add).right.ToString());
+                printBinaryOp("Add", (statement as Add).left, (statement as Add).right);
         if(statement is Subtract)
-                printBinaryOp("Subtract", (statement as Subtract).left.ToString(), (statement as Subtract).right.ToString());
+                printBinaryOp("Subtract", (statement as Subtract).left, (statement as Subtract).right);
         if(statement is Multiply)
-                printBinaryOp("Multiply", (statement as Multiply).left.ToString(), (statement as Multiply).right.ToString());
+                printBinaryOp("Multiply", (statement as Multiply).left, (statement as Multiply).right);
         if(statement is Divide)
-                printBinaryOp("Divide", (statement as Divide).left.ToString(), (statement as Divide).right.ToString());
+                printBinaryOp("Divide", (statement as Divide).left, (statement as Divide).right);
         if(statement is Const)
             Console.Write((statement as Const).value.ToString());
     }
 
-    private static void printBinaryOp(string op, string left, string right) {
-        Console.Write("Add <");
-        Console.Write(left);
-        Console.Write(">, <");
-        Console.Write(right);
-        Console.Write(">");
+    private static void printBinaryOp(string op, LeagueStatement left, LeagueStatement right) {
+        Console.Write(op + " ");
+        print(left);
+        Console.Write(" ");
+        print(right);
     }
 
     private static void printIf(If statement) {
@@ -158,52 +206,28 @@ public class LeagueInterpreter {
 
     //unit tests: expand these, or move to a framework perhaps?
     private void TestAdd() {
-        Add add = new Add();
-        Const five = new Const();
-        five.value = 5;
-        Const ten = new Const();
-        ten.value = 10;
-        add.left = five;
-        add.right = ten;
+        Add add = new Add(new Const(5), new Const(10));
 
         double result = interpret(add);
         if(result == 15) Console.WriteLine("Test Passed: TestAdd");
         else Console.WriteLine("Test Failed: TestAdd");
     }
     private void TestSubtract() {
-        Subtract sub  = new Subtract();
-        Const five = new Const();
-        five.value = 5;
-        Const ten = new Const();
-        ten.value = 10;
-        sub.left = five;
-        sub.right = ten;
+        Subtract sub  = new Subtract(new Const(5), new Const(10));
 
         double result = interpret(sub);
         if(result == -5) Console.WriteLine("Test Passed: TestSub");
         else Console.WriteLine("Test Failed: TestSub");
     }
     private void TestMultiply() {
-        Multiply mult = new Multiply();
-        Const five = new Const();
-        five.value = 5;
-        Const ten = new Const();
-        ten.value = 10;
-        mult.left = five;
-        mult.right = ten;
+        Multiply mult = new Multiply(new Const(5), new Const(10));
 
         double result = interpret(mult);
         if(result == 50) Console.WriteLine("Test Passed: TestMult");
         else Console.WriteLine("Test Failed: TestMult");
     }
     private void TestDivide() {
-        Divide div = new Divide();
-        Const five = new Const();
-        five.value = 5;
-        Const ten = new Const();
-        ten.value = 10;
-        div.left = five;
-        div.right = ten;
+        Divide div = new Divide(new Const(5), new Const(10));
 
         double result = interpret(div);
         if(result == .5) Console.WriteLine("Test Passed: TestDivide");

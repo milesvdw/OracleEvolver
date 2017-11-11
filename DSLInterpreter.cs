@@ -12,22 +12,35 @@ public class LeagueInterpreter : DSLInterpreter<int, LeagueStatement> {
     public double interpretMath(MathOp statement) {
         switch(statement.type) {
             case MathOpType.Add:
-                return statement.left + statement.right;
+                return interpret(statement.left) + interpret(statement.right);
                 break;
             case MathOpType.Subtract:
-                return statement.left - statement.right;
+                return interpret(statement.left) - interpret(statement.right);
                 break;
             case MathOpType.Multiply:
-                return statement.left * statement.right;
+                return interpret(statement.lef) * interpret(statement.right);
                 break;
             case MathOpType.Divide:
-                return statement.left / statement.right;
+                return interpret(statement.left) / interpret(statement.right);
                 break;
         }
     }
 
-    public int interpretIf(statement) {
-        return 0;
+    public int interpretIf(If statement) {
+        if(interpretBool(statement.condition)) return interpret(statement.left);
+        else return interpret(statement.right);
+    }
+
+    public bool interpretBool(BoolOp condition) {
+        if(condition is Not) {
+            return !interpret(condition.inner);
+        }
+        if(condition is And) {
+            return interpret(condition.left) && interpret(condition.right);
+        }
+        if(condition is Or) {
+            return interpret(condition.left) || interpret(condition.right);
+        }
     }
 
     //unit tests: expand these, or move to a framework perhaps?

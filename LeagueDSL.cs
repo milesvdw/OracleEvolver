@@ -30,12 +30,12 @@ public struct MathOp : LeagueStatement {
 public struct If : LeagueStatement {
     public StatementType LeagueStatementType = StatementType.MathOp;
     public Bool condition;
-    public Bool left;
-    public Bool right;
+    public LeagueStatement left;
+    public LeagueStatement right;
 }
 
+//this seems weird, is there a different way to structure booleans?
 public struct Bool {
-    public BoolOpType type;
 }
 
 public struct And : Bool {

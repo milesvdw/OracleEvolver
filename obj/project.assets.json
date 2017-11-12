@@ -664,28 +664,30 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\miles.vandewetering\\.nuget\\packages\\": {},
+    "C:\\Users\\pedantik\\.nuget\\packages\\": {},
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\miles.vandewetering\\Source\\Repos\\OracleEvolver\\OracleEvolver.csproj",
+      "projectUniqueName": "C:\\Users\\pedantik\\Desktop\\OracleEvolver\\OracleEvolver.csproj",
       "projectName": "OracleEvolver",
-      "projectPath": "C:\\Users\\miles.vandewetering\\Source\\Repos\\OracleEvolver\\OracleEvolver.csproj",
-      "packagesPath": "C:\\Users\\miles.vandewetering\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\miles.vandewetering\\Source\\Repos\\OracleEvolver\\obj\\",
+      "projectPath": "C:\\Users\\pedantik\\Desktop\\OracleEvolver\\OracleEvolver.csproj",
+      "packagesPath": "C:\\Users\\pedantik\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\pedantik\\Desktop\\OracleEvolver\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "C:\\Users\\miles.vandewetering\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\pedantik\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp2.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {

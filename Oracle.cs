@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using League;
 
 namespace OracleEvolver {
@@ -15,7 +16,23 @@ namespace OracleEvolver {
     public class Oracle {
         private LeagueStatement prophecy;
         public double fitness; //for now, this will simply be the percent of games correctly predicted
-        private Random rand = new Random();
+        
+        /**
+        * Gets a random double for a uniform distribution (uses Crypto RNG)
+         */
+        public static double GetRandomDouble() 
+        {
+            using (RandomNumberGenerator gen = RandomNumberGenerator.Create()) 
+            {
+                byte[] bytes = new byte[8];
+                gen.GetBytes(bytes);
+                // start: bit shift 11 and 53 based on double's mantissa bits
+                var ul = BitConverter.ToUInt64(bytes, 0) >> 11;
+                Double d = ul / (Double)(1UL << 53);
+                // end: bit shift logic
+                return d;
+            }
+        }
 
         public Oracle (LeagueStatement prophecy) {
             this.prophecy = prophecy;
@@ -29,7 +46,7 @@ namespace OracleEvolver {
         public void testFitness() {
             //todo: here we must repeatedly prophesize() and compare results with 
             //our learning dataset to evaluate the fitness of this algorithm
-            this.fitness = ((double)rand.Next(0, 100))/100;
+            this.fitness = GetRandomDouble();
         }
 
         //this function will mutate the oracle's list of prophecies, and create a new oracle
@@ -52,7 +69,7 @@ namespace OracleEvolver {
         private LeagueStatement mutateExpressionTree(LeagueStatement expression, double mutationChance) {
             //this is the biggest sticking point in terms of generalizing the approach. How do you
             //generalize mutation??
-            double roll = ((double)rand.Next(0, 100));
+            double roll = GetRandomDouble();
             if(roll < mutationChance) {//mutate!
                 expression = expression.mutate();
             }

@@ -5,7 +5,6 @@ using League;
 namespace OracleEvolver
 {
     public static class OracleEvolverProgram {
-        private static Const seed = new Const(1);
         private static List<Oracle> oracles = new List<Oracle>();
         private const int GENERATIONS = 100;
         private const int POPULATION = 100;
@@ -23,7 +22,7 @@ namespace OracleEvolver
         
         public static void seedPopulation() {
             for(int i = 0; i < POPULATION; i ++) {
-                oracles.Add(new Oracle(new Const(1)));
+                oracles.Add(new Oracle(new Int(1)));
             }
         }
 

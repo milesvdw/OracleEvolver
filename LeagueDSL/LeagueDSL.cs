@@ -13,8 +13,15 @@ namespace League {
     #endregion
 
     public class LeagueStatement {
+        public static LeagueStatement[] copyFromOld(LeagueStatement[] old, int quantity) {
+            LeagueStatement[] statements = new LeagueStatement[quantity];
+            for(int i = 0; i < statements.Length; i++) statements[i] = (old.Length > i) ? old[i] : new LeagueStatement();
+            return statements;
+        }
+        protected static Random rand = new Random();
         public static int MIN_COEFFICIENT = -5;
         public static int MAX_COEFFICIENT = 5;
+        public static double DELETION_CHANCE = .2;
         private LeagueStatement[] children; // this is the array of child nodes
         public LeagueStatement[] getChildren() {
             return children;
@@ -23,18 +30,24 @@ namespace League {
             children = new LeagueStatement[0];
         }
 
-        public LeagueStatement mutate(Random rand) {
+        private bool shouldDelete() {
+            return ((double)rand.Next(0, 100)) / 100 < DELETION_CHANCE;
+        }
+        public LeagueStatement mutate() {
+
             if(this is Number) {
-                return randomNumberType(rand);
+                if(shouldDelete()) return new Int(1);
+                return randomNumberType();
             }
             if(this is Bool) {
-                return randomBoolType(rand);
+                if(shouldDelete()) return new True();
+                return randomBoolType();
             }
             return null;
             
         }
 
-        private LeagueStatement randomBoolType(Random rand) {
+        private LeagueStatement randomBoolType() {
             int roll = rand.Next(1, 5);
             switch(roll) {  //this is, for now, unfortunately, a maintained list of every possible LeagueStatement
                 case 1:
@@ -55,7 +68,7 @@ namespace League {
             return null;
         }
 
-        private LeagueStatement randomNumberType(Random rand) {
+        private LeagueStatement randomNumberType() {
             int roll = rand.Next(1, 5);
             //note that this makes every kind of mutation equally likely...
             //whereas, ideally, mutations from one int to another should probably be the most likely
@@ -86,9 +99,9 @@ namespace League {
     }
 
     public class BinaryMathOp : LeagueStatement {
-        public BinaryMathOp(LeagueStatement[] statements) : base()
+        public BinaryMathOp(LeagueStatement[] old) : base()
         {
-            for(int i = statements.Length; i < 2; i++) statements[i] = new Int(1);
+            LeagueStatement[] statements = copyFromOld(old, 2);
             // if there is a type mismatch, then simply replace the offending type with unit
             if(!(statements[0] is Number)) statements[0] = new Int(1);
             if(!(statements[1] is Number)) statements[1] = new Int(1);
@@ -121,21 +134,23 @@ namespace League {
     }
 
     public class IntIf : LeagueStatement, Number {
-        public IntIf(LeagueStatement[] statements) : base()
+        public IntIf(LeagueStatement[] old) : base()
         {
-            if(statements.Length < 1 || !(statements[0] is Bool)) statements[0] = new True(); // default to true if not a boolean
-            if(statements.Length < 2 || !(statements[1] is Number)) statements[1] = new Int(1);
-            if(statements.Length < 3 || !(statements[2] is Number)) statements[2] = new Int(1);
+            LeagueStatement[] statements = copyFromOld(old, 3);
+            if(!(statements[0] is Bool)) statements[0] = new True(); // default to true if not a boolean
+            if(!(statements[1] is Number)) statements[1] = new Int(1);
+            if(!(statements[2] is Number)) statements[2] = new Int(1);
             init(statements, 3);
         }
     }
 
     public class BoolIf : LeagueStatement, Bool {
-        public BoolIf(LeagueStatement[] statements) : base()
+        public BoolIf(LeagueStatement[] old) : base()
         {
-            if(statements.Length < 1 || !(statements[0] is Bool)) statements[0] = new True(); // default to true if not a boolean
-            if(statements.Length < 2 || !(statements[1] is Bool)) statements[1] = new True();
-            if(statements.Length < 3 || !(statements[2] is Bool)) statements[2] = new True();
+            LeagueStatement[] statements = copyFromOld(old, 3);
+            if(!(statements[0] is Bool)) statements[0] = new True(); // default to true if not a boolean
+            if(!(statements[1] is Bool)) statements[1] = new True();
+            if(!(statements[2] is Bool)) statements[2] = new True();
             init(statements, 3);
         }
     }
@@ -154,10 +169,11 @@ namespace League {
     }
 
     public class BinaryBool : LeagueStatement, Bool {
-        public BinaryBool(LeagueStatement[] statements) : base()
+        public BinaryBool(LeagueStatement[] old) : base()
         {
-            if(statements.Length < 1 || !(statements[0] is Bool)) statements[0] = new True();
-            if(statements.Length < 2 || !(statements[1] is Bool)) statements[1] = new True();
+            LeagueStatement[] statements = copyFromOld(old, 2);
+            if(!(statements[0] is Bool)) statements[0] = new True();
+            if(!(statements[1] is Bool)) statements[1] = new True();
             init(statements, 2);
         }
     }
@@ -170,12 +186,13 @@ namespace League {
     }
 
     public class Not : LeagueStatement, Bool {
-        public Not(LeagueStatement[] statements)
+        public Not(LeagueStatement[] old)
         {
-            if(statements.Length < 1 || !(statements[0] is Bool)) statements[0] = new True();
+            LeagueStatement[] statements = copyFromOld(old, 1);
+            
+            if(!(statements[0] is Bool)) statements[0] = new True();
             init(statements, 1);
         }
-        public Bool inner;
     }
 
     public class EQ : BinaryBool, Bool {

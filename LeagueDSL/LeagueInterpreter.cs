@@ -3,49 +3,70 @@ using System;
 namespace League {
     public static class LeagueInterpreter {
         public static double interpret(LeagueStatement statement) {
-            if(statement is MathOp) return interpretMath(statement as MathOp);
-            if(statement is If) return interpretIf(statement as If);
-            if(statement is Const) return (statement as Const).value;
+            if(statement is BinaryMathOp) return interpretBinaryMathOp(statement);
+            if(statement is IntIf) return interpretNumIf(statement);
+            if(statement is Int) return (statement as Int).value;
             return 0;
         }
 
-        private static double interpretMath(MathOp statement) {
+        private static double interpretNumIf(LeagueStatement statement) {
+            LeagueStatement[] arguments = statement.getChildren();
+            if(interpretBool(arguments[0])) return interpret(arguments[1]);
+            else return interpret(arguments[2]);
+        }
+        private static double interpretBinaryMathOp(LeagueStatement statement) {
+            LeagueStatement[] arguments = statement.getChildren();
             if(statement is Add)
-                    return interpret((statement as Add).left) + interpret((statement as Add).right);
+                    return interpret(arguments[0]) + interpret(arguments[1]);
             if(statement is Subtract)
-                    return interpret((statement as Subtract).left) - interpret((statement as Subtract).right);
+                    return interpret(arguments[0]) - interpret(arguments[1]);
             if(statement is Multiply)
-                    return interpret((statement as Multiply).left) * interpret((statement as Multiply).right);
+                    return interpret(arguments[0]) * interpret(arguments[1]);
             if(statement is Divide)
-                    return interpret((statement as Divide).left) / interpret((statement as Divide).right);
-            if(statement is Const)
-                    return (statement as Const).value;
+                    return interpret(arguments[0]) / interpret(arguments[1]);
 
             return 0; // throw exception?
         }
 
-        private static double interpretIf(If statement) {
-            if(interpretBool(statement.condition)) return interpret(statement.left);
-            else return interpret(statement.right);
+        private static double interpretIf(LeagueStatement statement) {
+            LeagueStatement[] arguments = statement.getChildren();
+            if(interpretBool(arguments[0])) return interpret(arguments[1]);
+            else return interpret(arguments[2]);
         }
 
-        private static bool interpretBool(Bool condition) {
+        private static bool interpretBool(LeagueStatement condition) {
+            if(condition is BinaryBool) {
+                return interpretBinaryBool(condition as BinaryBool);
+            }
             if(condition is Not) {
-                return !interpretBool((condition as Not).inner);
-            }
-            if(condition is And) {
-                return interpretBool((condition as And).left) && interpretBool((condition as And).right);
-            }
-            if(condition is Or) {
-                return interpretBool((condition as Or).left) || interpretBool((condition as Or).right);
-            }
-            if(condition is AreEqual) {
-                return interpret((condition as AreEqual).left) == interpret((condition as AreEqual).right);
+                return !interpretBool(condition);
             }
             return false; //throw an error?
         }
 
+        private static bool interpretBinaryBool(LeagueStatement statement) {
+            LeagueStatement[] arguments = statement.getChildren();
+            if(statement is And) {
+                return interpretBool(arguments[0]) && interpretBool(arguments[1]);
+            }
+            if(statement is Or) {
+                return interpretBool(arguments[0]) || interpretBool(arguments[1]);
+            }
+            if(statement is EQ) {
+                return interpret(arguments[0]) == interpret(arguments[1]);
+            }
+            if(statement is GT) {
+                return interpret(arguments[0]) < interpret(arguments[1]);
+            }
+            if(statement is LT) {
+                return interpret(arguments[0]) > interpret(arguments[1]);
+            }
+            return false; //error state
+        }
         public static void RunTests() {
+            testData = new LeagueStatement[2];
+            testData[0] = new Int(5);
+            testData[1] = new Int(10);
             RunMathTests();
         }
 
@@ -56,30 +77,31 @@ namespace League {
             TestDivide();
         }
 
+        private static LeagueStatement[] testData;
         //unit tests: expand these, or move to a framework perhaps?
         private static void TestAdd() {
-            Add add = new Add(new Const(5), new Const(10));
+            Add add = new Add(testData);
 
             double result = interpret(add);
             if(result == 15) Console.WriteLine("Test Passed: TestAdd");
             else Console.WriteLine("Test Failed: TestAdd");
         }
         private static void TestSubtract() {
-            Subtract sub  = new Subtract(new Const(5), new Const(10));
+            Subtract sub  = new Subtract(testData);
 
             double result = interpret(sub);
             if(result == -5) Console.WriteLine("Test Passed: TestSub");
             else Console.WriteLine("Test Failed: TestSub");
         }
         private static void TestMultiply() {
-            Multiply mult = new Multiply(new Const(5), new Const(10));
+            Multiply mult = new Multiply(testData);
 
             double result = interpret(mult);
             if(result == 50) Console.WriteLine("Test Passed: TestMult");
             else Console.WriteLine("Test Failed: TestMult");
         }
         private static void TestDivide() {
-            Divide div = new Divide(new Const(5), new Const(10));
+            Divide div = new Divide(testData);
 
             double result = interpret(div);
             if(result == .5) Console.WriteLine("Test Passed: TestDivide");

@@ -15,6 +15,7 @@ namespace League {
                 Console.Write("(");
             Console.Write(statement.GetType());
             if(statement is Leaf) {
+                Console.Write(" ");
                 Console.Write((statement as Leaf).getValue());
             } else {
                 foreach(LeagueStatement s in statement.getChildren()) printStatement(s);

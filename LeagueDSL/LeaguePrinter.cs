@@ -18,7 +18,9 @@ namespace League {
                 Console.Write(" ");
                 Console.Write((statement as Leaf).getValue());
             } else {
+                Console.Write("(");
                 foreach(LeagueStatement s in statement.getChildren()) printStatement(s);
+                Console.Write(")");
             }
             Console.Write(")");
         }

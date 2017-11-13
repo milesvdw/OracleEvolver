@@ -21,7 +21,7 @@ namespace League {
         protected static Random rand = new Random();
         public static int MIN_COEFFICIENT = -5;
         public static int MAX_COEFFICIENT = 5;
-        public static double DELETION_CHANCE = .2;
+        public static double DELETION_CHANCE = .05;
         private LeagueStatement[] children; // this is the array of child nodes
         public LeagueStatement[] getChildren() {
             return children;
@@ -48,7 +48,7 @@ namespace League {
         }
 
         private LeagueStatement randomBoolType() {
-            int roll = rand.Next(1, 5);
+            int roll = rand.Next(1, 8);
             switch(roll) {  //this is, for now, unfortunately, a maintained list of every possible LeagueStatement
                 case 1:
                     return new And(children);
@@ -62,6 +62,8 @@ namespace League {
                     return new GT(children);
                 case 6:
                     return new LT(children);
+                case 7:
+                    return new Win(rand.Next(1, 2)*100);
                 default:
                     break;
             }
@@ -69,7 +71,7 @@ namespace League {
         }
 
         private LeagueStatement randomNumberType() {
-            int roll = rand.Next(1, 5);
+            int roll = rand.Next(1, 7);
             //note that this makes every kind of mutation equally likely...
             //whereas, ideally, mutations from one int to another should probably be the most likely
             //more investigation required.
@@ -83,7 +85,7 @@ namespace League {
                 case 4:
                     return new Divide(children);
                 case 5:
-                    return new Int(rand.Next(MIN_COEFFICIENT, MAX_COEFFICIENT));
+                    return new Int(rand.Next(MIN_COEFFICIENT, MAX_COEFFICIENT+1));
                 case 6:
                     return new IntIf(children);
                 default:
@@ -123,6 +125,7 @@ namespace League {
     }
 
     public class Int : LeagueStatement, Number, Leaf {
+        public double value;
         public string getValue() {
             return this.value.ToString();
         }
@@ -130,7 +133,6 @@ namespace League {
         {
             this.value = value;
         }
-        public double value;
     }
 
     public class IntIf : LeagueStatement, Number {
@@ -155,6 +157,15 @@ namespace League {
         }
     }
 
+    public class Win : LeagueStatement, Bool, Leaf {
+        public int team; //either 100 or 200
+        public string getValue() {
+            return "Win" + team.ToString();
+        }
+        public Win(int team) : base() {
+            this.team = team;
+        }
+    }
     public class True : LeagueStatement, Bool, Leaf {
         public string getValue() {
             return "True";

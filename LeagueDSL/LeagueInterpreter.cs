@@ -1,7 +1,10 @@
 using System;
+using System.Linq;
+using LeagueModels.MatchEndpoint;
 
 namespace League {
     public static class LeagueInterpreter {
+        public static Match match;
         public static double interpret(LeagueStatement statement) {
             if(statement is BinaryMathOp) return interpretBinaryMathOp(statement);
             if(statement is IntIf) return interpretNumIf(statement);
@@ -36,10 +39,13 @@ namespace League {
 
         private static bool interpretBool(LeagueStatement condition) {
             if(condition is BinaryBool) {
-                return interpretBinaryBool(condition as BinaryBool);
+                return interpretBinaryBool(condition);
             }
             if(condition is Not) {
                 return !interpretBool(condition);
+            }
+            if(condition is Win) {
+                return interpretWin(condition as Win);
             }
             return false; //throw an error?
         }
@@ -63,6 +69,11 @@ namespace League {
             }
             return false; //error state
         }
+
+        private static bool interpretWin(Win win) {
+            return match.Teams.FirstOrDefault(t => t.TeamId == win.team).Win == "Win";
+        }
+
         public static void RunTests() {
             testData = new LeagueStatement[2];
             testData[0] = new Int(5);

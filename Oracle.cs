@@ -15,21 +15,30 @@ namespace OracleEvolver {
     public class Oracle {
         private LeagueStatement prophecy;
         public double fitness; //for now, this will simply be the percent of games correctly predicted
-        private Random rand = new Random();
+        private static Random rand = new Random();
+
+        private static int[] tmp = {0, 1};
+        private static List<int> acceptableValues = new List<int>(tmp); //todo make this less terrifyingly bad code
 
         public Oracle (LeagueStatement prophecy) {
             this.prophecy = prophecy;
         }
 
-        public double prophesize() {
+        public int prophesize() {
             //in this function we will need to run through the prophecy instructions and compute our prediction
-            return LeagueInterpreter.interpret(prophecy);
+            return Convert.ToInt16(LeagueInterpreter.interpret(prophecy));
         }
 
-        public void testFitness() {
+
+        public void testFitness(double target) {
             //todo: here we must repeatedly prophesize() and compare results with 
             //our learning dataset to evaluate the fitness of this algorithm
-            this.fitness = ((double)rand.Next(0, 100))/100;
+            if (prophesize() == target) this.fitness += 1;
+            //else if (!acceptableValues.Contains(prophesize())) this.fitness -= 50; // hefty penalty for a nonsense answer
+        }
+
+        public void normalizeFitness(double maximum_possible_fitness) {
+            this.fitness = this.fitness/maximum_possible_fitness;
         }
 
         //this function will mutate the oracle's list of prophecies, and create a new oracle
@@ -52,11 +61,15 @@ namespace OracleEvolver {
         private LeagueStatement mutateExpressionTree(LeagueStatement expression, double mutationChance) {
             //this is the biggest sticking point in terms of generalizing the approach. How do you
             //generalize mutation??
-            double roll = ((double)rand.Next(0, 100));
+            double roll = ((double)rand.Next(0, 100))/100;
+            LeagueStatement[] oldChildren = expression.getChildren();
+            LeagueStatement[] newChildren = new LeagueStatement[oldChildren.Length];
+            for(int i = 0; i < oldChildren.Length; i ++) {
+                newChildren[i] = mutateExpressionTree(oldChildren[i], mutationChance); //inefficiency here - we mutate things that may get discarded by parent mutation...
+            }
             if(roll < mutationChance) {//mutate!
                 expression = expression.mutate();
             }
-            foreach(LeagueStatement s in expression.getChildren()) mutateExpressionTree(s, mutationChance);
             return expression;
         }
         

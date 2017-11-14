@@ -8,22 +8,22 @@ namespace Selection {
 
         //for now, this simply halves (if positive) the fitness of each oracle
         //for each neighbor oracle with the same structure
-        public static List<Oracle> Select(List<Oracle> population, double target) {
-            Oracle[] list = population.ToArray();
-
+        public static void AssignFitness(List<Oracle> population, double target) {
+            List<Oracle> valid = new List<Oracle>();
             //special case for first element
-            list[0].testFitness(target);
-            if(list.Length > 1 && list[0].Equals(list[1])) list[0].fitness = list[0].fitness / 2;
-            for(int i = 1; i < list.Length-1; i++) {
-                list[i].testFitness(target);
-                if(list[i].Equals(list[i-1])) list[i].fitness = list[i].fitness / 2;
-                if(list[i].Equals(list[i+1])) list[i].fitness = list[i].fitness / 2;
+            int err = population[0].testFitness(target);
+            if(err != -1) valid.Add(population[0]); 
+            if(population.Count > 1 && population[0].Equals(population[1])) population[0].fitness = population[0].fitness / 2;
+            for(int i = 1; i < population.Count-1; i++) {
+                err = population[i].testFitness(target);
+                if(population[i].Equals(population[i-1])) population[i].fitness = population[i].fitness / 2;
+                if(population[i].Equals(population[i+1])) population[i].fitness = population[i].fitness / 2;
+                if(err != -1) valid.Add(population[i]);
             }
             
-            list[list.Length-1].testFitness(target);
-            if(list[list.Length-2].Equals(list[list.Length-1])) list[list.Length-1].fitness = list[list.Length-1].fitness / 2;
-
-            return new List<Oracle>(list);
+            err = population[population.Count-1].testFitness(target);
+            if(population[population.Count-2].Equals(population[population.Count-1])) population[population.Count-1].fitness = population[population.Count-1].fitness / 2;
+            if(err != -1) valid.Add(population[population.Count-1]);
         }
 
     }

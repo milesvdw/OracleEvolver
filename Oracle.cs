@@ -40,17 +40,22 @@ namespace OracleEvolver {
             this.prophecy = prophecy;
         }
 
-        public int prophesize() {
+        public LeagueReturn prophesize() {
             //in this function we will need to run through the prophecy instructions and compute our prediction
-            return Convert.ToInt16(LeagueInterpreter.interpret(prophecy));
+            return LeagueInterpreter.interpret(prophecy);
         }
 
 
-        public void testFitness(double target) {
+        //if this returns -1, that indicates a runtime error in the prophecy
+        public int testFitness(double target) {
             //todo: here we must repeatedly prophesize() and compare results with 
             //our learning dataset to evaluate the fitness of this algorithm
-            if (prophesize() == target) this.fitness += 1;
-            //else if (!acceptableValues.Contains(prophesize())) this.fitness -= 50; // hefty penalty for a nonsense answer
+            LeagueReturn prophesization = prophesize();
+            if (prophesization is ValidReturn) {
+                if((prophesization as ValidReturn).value == target) this.fitness += 1;
+                return 1;
+            }
+            else return -1; //an error occured
         }
 
         public void normalizeFitness(double maximum_possible_fitness) {

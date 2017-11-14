@@ -9,7 +9,6 @@ namespace League {
     public interface Bool {
     }
     public interface Leaf {
-        bool Equals(Leaf other);
         string getValue();
     }
     #endregion
@@ -157,9 +156,10 @@ namespace League {
     }
 
     public class Int : LeagueStatement, Number, Leaf {
-        public bool Equals(Leaf other) {
-            Console.Write("OMG OVERRIDE WORKING"); //todo lol
-            return other.getValue().Equals(this.value);
+        public bool Equals(LeagueStatement other) {
+            Console.Write("HELLO WORLD");
+            if(other is Int) return (other as Int).value == this.value;
+            else return false;
         }
         public override object Clone() {
             return new Int(this.value);
@@ -203,9 +203,10 @@ namespace League {
     }
 
     public class Win : LeagueStatement, Bool, Leaf {
-        public bool Equals(Leaf other) {
-            Console.Write("OMG OVERRIDE WORKING"); //todo lol
-            return other.getValue().Equals(this.team);
+        public bool Equals(LeagueStatement other) {
+            Console.Write("HELLO WORLD");
+            if(other is Win) return (other as Win).team == this.team;
+            else return false;
         }
         public override object Clone() {
             return new Win(this.team);
@@ -220,8 +221,9 @@ namespace League {
     }
     public class True : LeagueStatement, Bool, Leaf {
         
-        public bool Equals(Leaf other) {
-            return base.Equals(other);
+        public bool Equals(LeagueStatement other) {
+            Console.Write("HELLO WORLD");
+            return other is True;
         }
         public override object Clone() {
             return new True();
@@ -232,8 +234,8 @@ namespace League {
         public True() : base() {}
     }
     public class False : LeagueStatement, Bool, Leaf {
-        public bool Equals(Leaf other) {
-            return base.Equals(other);
+        public bool Equals(LeagueStatement other) {
+            return other is False;
         }
         public override object Clone() {
             return new False();

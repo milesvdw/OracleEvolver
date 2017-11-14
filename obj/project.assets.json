@@ -3571,11 +3571,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\Users\\miles.vandewetering\\Source\\Repos\\OracleEvolver\\OracleEvolver.csproj",
+      "projectUniqueName": "C:\\Users\\miles.vandewetering\\Source\\Repos\\OracleEvolver\\OracleEvolver.csproj",
       "projectName": "OracleEvolver",
-      "projectPath": "c:\\Users\\miles.vandewetering\\Source\\Repos\\OracleEvolver\\OracleEvolver.csproj",
+      "projectPath": "C:\\Users\\miles.vandewetering\\Source\\Repos\\OracleEvolver\\OracleEvolver.csproj",
       "packagesPath": "C:\\Users\\miles.vandewetering\\.nuget\\packages\\",
-      "outputPath": "c:\\Users\\miles.vandewetering\\Source\\Repos\\OracleEvolver\\obj\\",
+      "outputPath": "C:\\Users\\miles.vandewetering\\Source\\Repos\\OracleEvolver\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

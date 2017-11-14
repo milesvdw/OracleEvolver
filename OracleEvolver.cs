@@ -73,7 +73,7 @@ namespace OracleEvolver
                     //the league DSL returns a double, but the oracles only answer yes/no questions
                     //so, the oracle will round the double to the nearest integer and compare to our target
                     //we ask our oracles to determine whether team 100 will win (1 for yes, 0 for no)
-                Selection.ListwiseLocalCompetition.Select(oracles, target);
+                Selection.ListwiseLocalCompetition.AssignFitness(oracles, target);
             }
             oracles.ForEach(o => o.normalizeFitness(matches.Count));
         }

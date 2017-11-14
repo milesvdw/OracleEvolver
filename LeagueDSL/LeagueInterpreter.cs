@@ -3,9 +3,33 @@ using System.Linq;
 using LeagueModels.MatchEndpoint;
 
 namespace League {
+
+    public class LeagueReturn {
+    }
+
+    public class RunTimeException : LeagueReturn {
+    }
+
+    public class ValidReturn : LeagueReturn {
+        public double value;
+        public ValidReturn(double retVal) {
+            this.value = retVal;
+        }
+    }
+
     public static class LeagueInterpreter {
         public static Match match;
-        public static double interpret(LeagueStatement statement) {
+        public static LeagueReturn interpret(LeagueStatement statement) {
+            try {
+                return new ValidReturn(interpretHelper(statement));
+            }
+            catch (Exception e) {
+                return new RunTimeException();
+            }
+
+        }
+
+        public static double interpretHelper(LeagueStatement statement) {
             if(statement is BinaryMathOp) return interpretBinaryMathOp(statement);
             if(statement is IntIf) return interpretNumIf(statement);
             if(statement is Int) return (statement as Int).value;
@@ -14,20 +38,19 @@ namespace League {
 
         private static double interpretNumIf(LeagueStatement statement) {
             LeagueStatement[] arguments = statement.getChildren();
-            if(interpretBool(arguments[0])) return interpret(arguments[1]);
-            else return interpret(arguments[2]);
+            if(interpretBool(arguments[0])) return interpretHelper(arguments[1]);
+            else return interpretHelper(arguments[2]);
         }
         private static double interpretBinaryMathOp(LeagueStatement statement) {
             LeagueStatement[] arguments = statement.getChildren();
             if(statement is Add)
-                    return interpret(arguments[0]) + interpret(arguments[1]);
+                return interpretHelper(arguments[0]) + interpretHelper(arguments[1]);
             if(statement is Subtract)
-                    return interpret(arguments[0]) - interpret(arguments[1]);
+                return interpretHelper(arguments[0]) - interpretHelper(arguments[1]);
             if(statement is Multiply)
-                    return interpret(arguments[0]) * interpret(arguments[1]);
+                return interpretHelper(arguments[0]) * interpretHelper(arguments[1]);
             if(statement is Divide) {
-                    double denominator = interpret(arguments[1]);
-                    return interpret(arguments[0]) / (denominator != 0) ? denominator;
+                return interpretHelper(arguments[0]) / interpretHelper(arguments[1]);
             }
 
             return 0; // throw exception?
@@ -35,8 +58,8 @@ namespace League {
 
         private static double interpretIf(LeagueStatement statement) {
             LeagueStatement[] arguments = statement.getChildren();
-            if(interpretBool(arguments[0])) return interpret(arguments[1]);
-            else return interpret(arguments[2]);
+            if(interpretBool(arguments[0])) return interpretHelper(arguments[1]);
+            else return interpretHelper(arguments[2]);
         }
 
         private static bool interpretBool(LeagueStatement condition) {
@@ -61,13 +84,13 @@ namespace League {
                 return interpretBool(arguments[0]) || interpretBool(arguments[1]);
             }
             if(statement is EQ) {
-                return interpret(arguments[0]) == interpret(arguments[1]);
+                return interpretHelper(arguments[0]) == interpretHelper(arguments[1]);
             }
             if(statement is GT) {
-                return interpret(arguments[0]) < interpret(arguments[1]);
+                return interpretHelper(arguments[0]) < interpretHelper(arguments[1]);
             }
             if(statement is LT) {
-                return interpret(arguments[0]) > interpret(arguments[1]);
+                return interpretHelper(arguments[0]) > interpretHelper(arguments[1]);
             }
             return false; //error state
         }
@@ -95,28 +118,28 @@ namespace League {
         private static void TestAdd() {
             Add add = new Add(testData);
 
-            double result = interpret(add);
+            double result = interpretHelper(add);
             if(result == 15) Console.WriteLine("Test Passed: TestAdd");
             else Console.WriteLine("Test Failed: TestAdd");
         }
         private static void TestSubtract() {
             Subtract sub  = new Subtract(testData);
 
-            double result = interpret(sub);
+            double result = interpretHelper(sub);
             if(result == -5) Console.WriteLine("Test Passed: TestSub");
             else Console.WriteLine("Test Failed: TestSub");
         }
         private static void TestMultiply() {
             Multiply mult = new Multiply(testData);
 
-            double result = interpret(mult);
+            double result = interpretHelper(mult);
             if(result == 50) Console.WriteLine("Test Passed: TestMult");
             else Console.WriteLine("Test Failed: TestMult");
         }
         private static void TestDivide() {
             Divide div = new Divide(testData);
 
-            double result = interpret(div);
+            double result = interpretHelper(div);
             if(result == .5) Console.WriteLine("Test Passed: TestDivide");
             else Console.WriteLine("Test Failed: TestDivide");
         }

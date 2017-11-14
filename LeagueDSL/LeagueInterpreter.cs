@@ -25,8 +25,10 @@ namespace League {
                     return interpret(arguments[0]) - interpret(arguments[1]);
             if(statement is Multiply)
                     return interpret(arguments[0]) * interpret(arguments[1]);
-            if(statement is Divide)
-                    return interpret(arguments[0]) / interpret(arguments[1]);
+            if(statement is Divide) {
+                    double denominator = interpret(arguments[1]);
+                    return interpret(arguments[0]) / (denominator != 0) ? denominator;
+            }
 
             return 0; // throw exception?
         }

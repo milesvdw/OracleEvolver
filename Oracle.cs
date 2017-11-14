@@ -22,7 +22,7 @@ namespace OracleEvolver {
         /**
         * Gets a random double for a uniform distribution (uses Crypto RNG)
          */
-        public static double GetRandomDouble() 
+        public static double GetRandomPercent() 
         {
             using (RandomNumberGenerator gen = RandomNumberGenerator.Create()) 
             {
@@ -64,11 +64,11 @@ namespace OracleEvolver {
                 case MutationStrategy.Equilibrium:
                     return new Oracle(prophecy);
                 case MutationStrategy.Aggressive:
-                    return new Oracle(mutateExpressionTree(expression: this.prophecy, mutationChance: .75));
+                    return new Oracle(mutateExpressionTree(expression: (LeagueStatement) this.prophecy.Clone(), mutationChance: .75));
                 case MutationStrategy.Normal:
-                    return new Oracle(mutateExpressionTree(expression: this.prophecy, mutationChance: .5));
+                    return new Oracle(mutateExpressionTree(expression: (LeagueStatement) this.prophecy.Clone(), mutationChance: .5));
                 case MutationStrategy.Slow:
-                    return new Oracle(mutateExpressionTree(expression: this.prophecy, mutationChance: .25));
+                    return new Oracle(mutateExpressionTree(expression: (LeagueStatement) this.prophecy.Clone(), mutationChance: .25));
                 default:
                     return null;
             }
@@ -77,12 +77,12 @@ namespace OracleEvolver {
         private LeagueStatement mutateExpressionTree(LeagueStatement expression, double mutationChance) {
             //this is the biggest sticking point in terms of generalizing the approach. How do you
             //generalize mutation??
-            double roll = GetRandomDouble()/100;
-            LeagueStatement[] oldChildren = expression.getChildren();
-            LeagueStatement[] newChildren = new LeagueStatement[oldChildren.Length];
-            for(int i = 0; i < oldChildren.Length; i ++) {
-                newChildren[i] = mutateExpressionTree(oldChildren[i], mutationChance); //inefficiency here - we mutate things that may get discarded by parent mutation...
+            List<LeagueStatement> newChildren = new List<LeagueStatement>();
+            foreach(LeagueStatement child in expression.getChildren()) {
+                newChildren.Add(mutateExpressionTree(child, mutationChance)); //inefficiency here - we mutate things that may get discarded by parent mutation...
             }
+            expression.setChildren(newChildren.ToArray());
+            double roll = GetRandomPercent();
             if(roll < mutationChance) {//mutate!
                 expression = expression.mutate();
             }

@@ -12,12 +12,12 @@ namespace OracleEvolver
         private static List<Oracle> oracles = new List<Oracle>();
         private const int GENERATIONS = 10000;
         private const int REPRODUCTION_RATE = 3;
-        private const int POPULATION = 300;
+        private const int POPULATION = 20;
         private const bool USE_TRAINING_DATA = true;
         private static int current_generation;
         private const bool PRINT_VERBOSE = false;
         private const int PRINT_FREQUENCY = 1;
-        private const MutationStrategy STRATEGY = MutationStrategy.Aggressive;
+        private const MutationStrategy STRATEGY = MutationStrategy.Slow;
         public static void Main() {
             seedPopulation();
             evolve();
@@ -46,12 +46,12 @@ namespace OracleEvolver
 
         public static void mutateOracles() {
             List<Oracle> newOracles = new List<Oracle>();
-            for(int i = 0; i < REPRODUCTION_RATE; i++) {
+            for(int i = 0; i < REPRODUCTION_RATE; i++) { //todo reorder this loop to prevent cache misses?
                 foreach(Oracle oracle in oracles) {
                     newOracles.Add(oracle.spawnMutant(STRATEGY));
                 }
             }
-            oracles = newOracles;
+            oracles.AddRange(newOracles);
         }
 
         //returns a batch of 200 matches
@@ -73,14 +73,13 @@ namespace OracleEvolver
                     //the league DSL returns a double, but the oracles only answer yes/no questions
                     //so, the oracle will round the double to the nearest integer and compare to our target
                     //we ask our oracles to determine whether team 100 will win (1 for yes, 0 for no)
-                oracles.ForEach(o => o.testFitness(target: target));
+                Selection.ListwiseLocalCompetition.Select(oracles, target);
             }
             oracles.ForEach(o => o.normalizeFitness(matches.Count));
         }
         public static void pruneOracles() {
-            oracles.Sort(delegate(Oracle oracle1, Oracle oracle2) {
-                return oracle1.fitness.CompareTo(oracle2.fitness);
-            });
+            oracles = oracles.OrderBy(o => o.fitness).ToList();
+            oracles.RemoveRange(0, oracles.Count - POPULATION);
             oracles.RemoveRange(0, oracles.Count - POPULATION);
             oracles.ForEach(o => o.fitness = 0); // reset fitness for next generation
         }
@@ -97,7 +96,7 @@ namespace OracleEvolver
                     Console.WriteLine(current_generation);
                     mutateOracles();
                     testOraclesFitness();
-                    if(current_generation % 10 == 0) printOracles(); //only print every 10 generations
+                    if(current_generation % 1 == 0) printOracles(); //only print every 10 generations
                     pruneOracles();
                     //printOracles();
                 }

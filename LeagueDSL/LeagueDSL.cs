@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 
 namespace League {
 
@@ -8,24 +9,37 @@ namespace League {
     public interface Bool {
     }
     public interface Leaf {
+        bool Equals(Leaf other);
         string getValue();
     }
     #endregion
 
-    public class LeagueStatement {
+    public abstract class LeagueStatement : ICloneable, IEquatable<LeagueStatement> {
+
+        public void setChildren(LeagueStatement[] newChildren) {
+            this.children = newChildren;
+        }
         public static LeagueStatement[] copyFromOld(LeagueStatement[] old, int quantity) {
             LeagueStatement[] statements = new LeagueStatement[quantity];
-            for(int i = 0; i < statements.Length; i++) statements[i] = (old.Length > i) ? old[i] : new LeagueStatement();
+            for(int i = 0; i < statements.Length; i++) statements[i] = (old.Length > i) ? old[i] : new Default();
             return statements;
         }
+
+        public bool Equals(LeagueStatement other) {
+            return this.GetType() == other.GetType() && this.children.Zip(other.children, (me, it) => me.Equals(it)).All(x => x);
+        }
+
         protected static Random rand = new Random();
         public static int MIN_COEFFICIENT = -5;
         public static int MAX_COEFFICIENT = 5;
         public static double DELETION_CHANCE = .05;
-        private LeagueStatement[] children; // this is the array of child nodes
+        protected LeagueStatement[] children; // this is the array of child nodes
         public LeagueStatement[] getChildren() {
             return children;
         }
+
+        public abstract object Clone();
+
         public LeagueStatement() {
             children = new LeagueStatement[0];
         }
@@ -100,7 +114,13 @@ namespace League {
         }
     }
 
-    public class BinaryMathOp : LeagueStatement {
+    public class Default : LeagueStatement { //it makes me cry inside that this has to exist...
+        public override object Clone() {
+            return new Default();
+        }
+    }
+
+    public abstract class BinaryMathOp : LeagueStatement {
         public BinaryMathOp(LeagueStatement[] old) : base()
         {
             LeagueStatement[] statements = copyFromOld(old, 2);
@@ -111,20 +131,39 @@ namespace League {
         }
     }
     public class Add : BinaryMathOp, Number {
+        public override object Clone() {
+            return new Add(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+        }
         public Add(LeagueStatement[] statements) : base(statements) {}
     }
 
     public class Subtract : BinaryMathOp, Number {
+        public override object Clone() {
+            return new Subtract(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+        }
         public Subtract(LeagueStatement[] statements) : base(statements) {}
     }
     public class Divide : BinaryMathOp, Number {
+        public override object Clone() {
+            return new Divide(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+        }
         public Divide(LeagueStatement[] statements) : base(statements) {}
     }
     public class Multiply : BinaryMathOp, Number {
+        public override object Clone() {
+            return new Multiply(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+        }
         public Multiply(LeagueStatement[] statements) : base(statements) {}
     }
 
     public class Int : LeagueStatement, Number, Leaf {
+        public bool Equals(Leaf other) {
+            Console.Write("OMG OVERRIDE WORKING"); //todo lol
+            return other.getValue().Equals(this.value);
+        }
+        public override object Clone() {
+            return new Int(this.value);
+        }
         public double value;
         public string getValue() {
             return this.value.ToString();
@@ -136,6 +175,9 @@ namespace League {
     }
 
     public class IntIf : LeagueStatement, Number {
+        public override object Clone() {
+            return new IntIf(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+        }
         public IntIf(LeagueStatement[] old) : base()
         {
             LeagueStatement[] statements = copyFromOld(old, 3);
@@ -147,6 +189,9 @@ namespace League {
     }
 
     public class BoolIf : LeagueStatement, Bool {
+        public override object Clone() {
+            return new BoolIf(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+        }
         public BoolIf(LeagueStatement[] old) : base()
         {
             LeagueStatement[] statements = copyFromOld(old, 3);
@@ -158,6 +203,13 @@ namespace League {
     }
 
     public class Win : LeagueStatement, Bool, Leaf {
+        public bool Equals(Leaf other) {
+            Console.Write("OMG OVERRIDE WORKING"); //todo lol
+            return other.getValue().Equals(this.team);
+        }
+        public override object Clone() {
+            return new Win(this.team);
+        }
         public int team; //either 100 or 200
         public string getValue() {
             return "Win" + team.ToString();
@@ -167,12 +219,25 @@ namespace League {
         }
     }
     public class True : LeagueStatement, Bool, Leaf {
+        
+        public bool Equals(Leaf other) {
+            return base.Equals(other);
+        }
+        public override object Clone() {
+            return new True();
+        }
         public string getValue() {
             return "True";
         }
         public True() : base() {}
     }
     public class False : LeagueStatement, Bool, Leaf {
+        public bool Equals(Leaf other) {
+            return base.Equals(other);
+        }
+        public override object Clone() {
+            return new False();
+        }
         public string getValue() {
             return "False";
         }
@@ -180,6 +245,9 @@ namespace League {
     }
 
     public class BinaryBool : LeagueStatement, Bool {
+        public override object Clone() {
+            return new False();
+        }
         public BinaryBool(LeagueStatement[] old) : base()
         {
             LeagueStatement[] statements = copyFromOld(old, 2);
@@ -189,14 +257,23 @@ namespace League {
         }
     }
     public class And : BinaryBool, Bool {
+        public override object Clone() {
+            return new And(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+        }
         public And(LeagueStatement[] statements) : base(statements) {}
     }
 
     public class Or : BinaryBool, Bool {
+        public override object Clone() {
+            return new Or(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+        }
         public Or(LeagueStatement[] statements) : base(statements) {}
     }
 
     public class Not : LeagueStatement, Bool {
+        public override object Clone() {
+            return new Not(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+        }
         public Not(LeagueStatement[] old)
         {
             LeagueStatement[] statements = copyFromOld(old, 1);
@@ -207,12 +284,21 @@ namespace League {
     }
 
     public class EQ : BinaryBool, Bool {
+        public override object Clone() {
+            return new EQ(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+        }
         public EQ(LeagueStatement[] statements) : base(statements) {}
     }
     public class GT : BinaryBool, Bool {
+        public override object Clone() {
+            return new GT(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+        }
         public GT(LeagueStatement[] statements) : base(statements) {}
     }
     public class LT : BinaryBool, Bool {
+        public override object Clone() {
+            return new LT(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+        }
         public LT(LeagueStatement[] statements) : base(statements) {}
     }
 }

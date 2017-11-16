@@ -14,8 +14,9 @@ namespace OracleEvolver {
     //this will be our representation of a single evolved algorithm, calculator, or 'oracle'
     public class Oracle {
         private LeagueStatement prophecy;
+        public const double STRING_EVOLUTION_PROBABILITY = .5;
         public double fitness; //for now, this will simply be the percent of games correctly predicted
-
+        public HashSet<double> answers = new HashSet<double>();
         private static int[] tmp = {0, 1};
         private static List<int> acceptableValues = new List<int>(tmp); //todo make this less terrifyingly bad code
 
@@ -50,15 +51,25 @@ namespace OracleEvolver {
         public int testFitness(double target) {
             //todo: here we must repeatedly prophesize() and compare results with 
             //our learning dataset to evaluate the fitness of this algorithm
+
             LeagueReturn prophesization = prophesize();
             if (prophesization is ValidReturn) {
-                if((prophesization as ValidReturn).value == target) this.fitness += 1;
+                double ret = (prophesization as ValidReturn).value;
+                if(ret == target) {
+                    this.fitness += 1;
+                }
+                answers.Add(ret);
                 return 1;
             }
             else return -1; //an error occured
         }
 
         public void normalizeFitness(double maximum_possible_fitness) {
+            if(answers.Count <= 1) {//no points for producing the same answer every time (e.g. just guessing the same team won over and over)
+                this.fitness = 0;
+                answers.Clear();
+                return;
+            }
             this.fitness = this.fitness/maximum_possible_fitness;
         }
 
@@ -69,31 +80,44 @@ namespace OracleEvolver {
                 case MutationStrategy.Equilibrium:
                     return new Oracle(prophecy);
                 case MutationStrategy.Aggressive:
-                    return new Oracle(mutateExpressionTree(expression: (LeagueStatement) this.prophecy.Clone(), mutationChance: .75));
+                    return new Oracle(mutateExpressionTree(expression: (LeagueStatement) this.prophecy, mutationChance: .75));
                 case MutationStrategy.Normal:
-                    return new Oracle(mutateExpressionTree(expression: (LeagueStatement) this.prophecy.Clone(), mutationChance: .5));
+                    return new Oracle(mutateExpressionTree(expression: (LeagueStatement) this.prophecy, mutationChance: .5));
                 case MutationStrategy.Slow:
-                    return new Oracle(mutateExpressionTree(expression: (LeagueStatement) this.prophecy.Clone(), mutationChance: .25));
+                    return new Oracle(mutateExpressionTree(expression: (LeagueStatement) this.prophecy, mutationChance: .25));
                 default:
                     return null;
             }
         }
 
+        //mutateExpressionTree :: LeagueStatement -> Different LeagueStatement
         private LeagueStatement mutateExpressionTree(LeagueStatement expression, double mutationChance) {
             //this is the biggest sticking point in terms of generalizing the approach. How do you
             //generalize mutation??
+
+            bool isOldEq = expression is EQ;
+            double roll = GetRandomPercent();
+
             List<LeagueStatement> newChildren = new List<LeagueStatement>();
             foreach(LeagueStatement child in expression.getChildren()) {
-                newChildren.Add(mutateExpressionTree(child, mutationChance)); //inefficiency here - we mutate things that may get discarded by parent mutation...
+                newChildren.Add(mutateExpressionTree(child, mutationChance));
             }
             expression.setChildren(newChildren.ToArray());
-            double roll = GetRandomPercent();
+            LeagueStatement newExpression;
             if(roll < mutationChance) {//mutate!
-                expression = expression.mutate();
+                newExpression = expression.mutate();
+            } else {
+                newExpression = (LeagueStatement) expression.Clone();
             }
-            return expression;
+            
+            return newExpression;
         }
-        
+
+        private LeagueStatement newString() {
+            LeagueStatement x = new StringLit("");
+            return x.randomStringType();
+        }
+
         public void TranscribeProphecy() {
             DSLPrinter.print(this.prophecy);
         }

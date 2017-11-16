@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using League;
-using LeagueModels.MatchEndpoint;
-using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace OracleEvolver
 {
     public static class OracleEvolverProgram {
         private static List<Oracle> oracles = new List<Oracle>();
-        private const int GENERATIONS = 10000;
+        private const string answerAccessor = "teams[0].win";
+        private const int GENERATIONS = 5000;
         private const int REPRODUCTION_RATE = 3;
-        private const int POPULATION = 20;
+        private const int POPULATION = 10;
         private const bool USE_TRAINING_DATA = true;
         private static int current_generation;
         private const bool PRINT_VERBOSE = false;
@@ -28,7 +28,7 @@ namespace OracleEvolver
         
         public static void seedPopulation() {
             for(int i = 0; i < POPULATION; i ++) {
-                oracles.Add(new Oracle(new Int(1)));
+                oracles.Add(new Oracle(new IntVal(1)));
             }
         }
 
@@ -55,24 +55,27 @@ namespace OracleEvolver
         }
 
         //returns a batch of 200 matches
-        private static List<Match> getMatches() {
+        private static List<JToken> getMatches() {
+            List<JToken> matches = new List<JToken>();
             if(USE_TRAINING_DATA) {
                 using (StreamReader r = new StreamReader("LeagueDSL/TrainingData/matches1.json"))
                 {
                     string json = r.ReadToEnd();
-                    return JsonConvert.DeserializeObject<MatchWrapper>(json).matches;
+                    return JObject.Parse(json).SelectTokens("matches").ToList(); //MILES TODO check that this is OK...
                 }
             }
+            return new List<JToken>();
         }
 
         public static void testOraclesFitness() {
-            List<Match> matches = getMatches();
-            foreach(Match match in matches){
+            List<JToken> matches = getMatches();
+            foreach(JToken match in matches[0].Children()) {
                 LeagueInterpreter.match = match;
-                double target = match.Teams.FirstOrDefault(t => t.TeamId == 100).Win == "Win" ? 1 : 0; //did team 100 win?
-                    //the league DSL returns a double, but the oracles only answer yes/no questions
-                    //so, the oracle will round the double to the nearest integer and compare to our target
-                    //we ask our oracles to determine whether team 100 will win (1 for yes, 0 for no)
+                double target = 0;
+                JToken team1 = match.SelectToken("teams[0]"); //MILES TODO refactor this so it can be passed in as a delegate
+                JToken team2 = match.SelectToken("teams[1]");
+                if((int) team1.SelectToken("teamId") == 100) target = (string)team1.SelectToken("win") == "Win" ? 1 : 0;
+                else target = (string)team2.SelectToken("win") == "Win" ? 1 : 0;
                 Selection.ListwiseLocalCompetition.AssignFitness(oracles, target);
             }
             oracles.ForEach(o => o.normalizeFitness(matches.Count));
@@ -96,8 +99,8 @@ namespace OracleEvolver
                     Console.WriteLine(current_generation);
                     mutateOracles();
                     testOraclesFitness();
-                    if(current_generation % 1 == 0) printOracles(); //only print every 10 generations
                     pruneOracles();
+                    if(current_generation % 1 == 0) printOracles(); //only print every 10 generations
                     //printOracles();
                 }
             }

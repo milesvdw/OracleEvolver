@@ -8,12 +8,19 @@ namespace League {
     }
     public interface Bool {
     }
+    public interface StringType {
+    }
+
     public interface Leaf {
         string getValue();
     }
     #endregion
 
     public abstract class LeagueStatement : ICloneable, IEquatable<LeagueStatement> {
+        public static string[] literalList = {"Win", "Fail"};
+        public static string[] stringAccessorList = {"teams[0].win", "teams[1].win"};
+        public static string[] doubleAccessorList = {"teams[0].teamId", "teams[1].teamId"};
+        public static string[] boolAccessorList = {"teams[0].firstRiftHerald", "teams[1].firstRiftHerald"};
 
         public void setChildren(LeagueStatement[] newChildren) {
             this.children = newChildren;
@@ -49,19 +56,49 @@ namespace League {
         public LeagueStatement mutate() {
 
             if(this is Number) {
-                if(shouldDelete()) return new Int(1);
+                if(shouldDelete()) return new IntVal(1);
                 return randomNumberType();
             }
             if(this is Bool) {
                 if(shouldDelete()) return new True();
                 return randomBoolType();
             }
+            if(this is StringType) {
+                if(shouldDelete()) return (LeagueStatement) this.Clone(); //can't delete a string, doesn't make sense. only delete the parent node.
+                return randomStringType();
+            }
             return null;
             
         }
 
+        public LeagueStatement randomStringType() {
+            if(stringAccessorList.Length > 0) {
+                int roll = rand.Next(1, 3);
+                switch(roll) {  //this is, for now, unfortunately, a maintained list of every possible LeagueStatement
+                    case 1:
+                        return new JsonString(randomAccessor(stringAccessorList));
+                    case 2:
+                        return new StringLit(randomStringLit());
+                }
+            }
+            else {
+                return this.randomNumberType(); //if no string types exist in the language, replace all strings with ints
+            }
+            throw new ArgumentException();
+        }
+
+        private static string randomStringLit() {
+            int roll = rand.Next(1, literalList.Length);
+            return literalList[roll];
+        }
+
+        private static string randomAccessor(string[] list) {
+            int roll = rand.Next(1, list.Length);
+            return list[roll];
+        }
+
         private LeagueStatement randomBoolType() {
-            int roll = rand.Next(1, 8);
+            int roll = rand.Next(1, 9);
             switch(roll) {  //this is, for now, unfortunately, a maintained list of every possible LeagueStatement
                 case 1:
                     return new And(children);
@@ -76,7 +113,9 @@ namespace League {
                 case 6:
                     return new LT(children);
                 case 7:
-                    return new Win(rand.Next(1, 2)*100);
+                    return new Not(children);
+                case 8:
+                    return new JsonBool(randomAccessor(boolAccessorList));
                 default:
                     break;
             }
@@ -84,7 +123,7 @@ namespace League {
         }
 
         private LeagueStatement randomNumberType() {
-            int roll = rand.Next(1, 7);
+            int roll = rand.Next(1, 8);
             //note that this makes every kind of mutation equally likely...
             //whereas, ideally, mutations from one int to another should probably be the most likely
             //more investigation required.
@@ -98,9 +137,11 @@ namespace League {
                 case 4:
                     return new Divide(children);
                 case 5:
-                    return new Int(rand.Next(MIN_COEFFICIENT, MAX_COEFFICIENT+1));
+                    return new IntVal(rand.Next(MIN_COEFFICIENT, MAX_COEFFICIENT+1));
                 case 6:
                     return new IntIf(children);
+                case 7:
+                    return new JsonDouble(randomAccessor(doubleAccessorList));
                 default:
                     break;
             }
@@ -124,73 +165,88 @@ namespace League {
         {
             LeagueStatement[] statements = copyFromOld(old, 2);
             // if there is a type mismatch, then simply replace the offending type with unit
-            if(!(statements[0] is Number)) statements[0] = new Int(1);
-            if(!(statements[1] is Number)) statements[1] = new Int(1);
+            if(!(statements[0] is Number)) statements[0] = new IntVal(1);
+            if(!(statements[1] is Number)) statements[1] = new IntVal(1);
             init(statements, 2);
         }
     }
     public class Add : BinaryMathOp, Number {
         public override object Clone() {
-            return new Add(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+            return new Add(this.children);
         }
         public Add(LeagueStatement[] statements) : base(statements) {}
     }
 
     public class Subtract : BinaryMathOp, Number {
         public override object Clone() {
-            return new Subtract(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+            return new Subtract(this.children);
         }
         public Subtract(LeagueStatement[] statements) : base(statements) {}
     }
     public class Divide : BinaryMathOp, Number {
         public override object Clone() {
-            return new Divide(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+            return new Divide(this.children);
         }
         public Divide(LeagueStatement[] statements) : base(statements) {}
     }
     public class Multiply : BinaryMathOp, Number {
         public override object Clone() {
-            return new Multiply(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+            return new Multiply(this.children);
         }
         public Multiply(LeagueStatement[] statements) : base(statements) {}
     }
 
-    public class Int : LeagueStatement, Number, Leaf {
+    public class IntVal : LeagueStatement, Number, Leaf {
         public bool Equals(LeagueStatement other) {
             Console.Write("HELLO WORLD");
-            if(other is Int) return (other as Int).value == this.value;
+            if(other is IntVal) return (other as IntVal).value == this.value;
             else return false;
         }
         public override object Clone() {
-            return new Int(this.value);
+            return new IntVal(this.value);
         }
         public double value;
         public string getValue() {
             return this.value.ToString();
         }
-        public Int(double value)  : base()
+        public IntVal(double value)  : base()
         {
             this.value = value;
         }
     }
 
+    public class JsonDouble : LeagueStatement, Number, Leaf {
+        public string accessor;
+        public override object Clone() {
+            return new JsonDouble(this.accessor);
+        }
+
+        public string getValue() {
+            return this.accessor;
+        }
+
+        public JsonDouble(string accessor) {
+            this.accessor = accessor;
+        }
+    }
+
     public class IntIf : LeagueStatement, Number {
         public override object Clone() {
-            return new IntIf(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+            return new IntIf(this.children);
         }
         public IntIf(LeagueStatement[] old) : base()
         {
             LeagueStatement[] statements = copyFromOld(old, 3);
             if(!(statements[0] is Bool)) statements[0] = new True(); // default to true if not a boolean
-            if(!(statements[1] is Number)) statements[1] = new Int(1);
-            if(!(statements[2] is Number)) statements[2] = new Int(1);
+            if(!(statements[1] is Number)) statements[1] = new IntVal(1);
+            if(!(statements[2] is Number)) statements[2] = new IntVal(1);
             init(statements, 3);
         }
     }
 
     public class BoolIf : LeagueStatement, Bool {
         public override object Clone() {
-            return new BoolIf(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+            return new BoolIf(this.children);
         }
         public BoolIf(LeagueStatement[] old) : base()
         {
@@ -201,28 +257,9 @@ namespace League {
             init(statements, 3);
         }
     }
-
-    public class Win : LeagueStatement, Bool, Leaf {
-        public bool Equals(LeagueStatement other) {
-            Console.Write("HELLO WORLD");
-            if(other is Win) return (other as Win).team == this.team;
-            else return false;
-        }
-        public override object Clone() {
-            return new Win(this.team);
-        }
-        public int team; //either 100 or 200
-        public string getValue() {
-            return "Win" + team.ToString();
-        }
-        public Win(int team) : base() {
-            this.team = team;
-        }
-    }
     public class True : LeagueStatement, Bool, Leaf {
         
         public bool Equals(LeagueStatement other) {
-            Console.Write("HELLO WORLD");
             return other is True;
         }
         public override object Clone() {
@@ -246,9 +283,24 @@ namespace League {
         public False() : base() {}
     }
 
+    public class JsonBool : LeagueStatement, Bool, Leaf {
+        public string accessor;
+        public override object Clone() {
+            return new JsonBool(this.accessor);
+        }
+
+        public string getValue() {
+            return this.accessor;
+        }
+
+        public JsonBool(string accessor) {
+            this.accessor = accessor;
+        }
+    }
+
     public class BinaryBool : LeagueStatement, Bool {
         public override object Clone() {
-            return new False();
+            return new BinaryBool(this.children);
         }
         public BinaryBool(LeagueStatement[] old) : base()
         {
@@ -260,21 +312,21 @@ namespace League {
     }
     public class And : BinaryBool, Bool {
         public override object Clone() {
-            return new And(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+            return new And(this.children);
         }
         public And(LeagueStatement[] statements) : base(statements) {}
     }
 
     public class Or : BinaryBool, Bool {
         public override object Clone() {
-            return new Or(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+            return new Or(this.children);
         }
         public Or(LeagueStatement[] statements) : base(statements) {}
     }
 
     public class Not : LeagueStatement, Bool {
         public override object Clone() {
-            return new Not(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+            return new Not(this.children);
         }
         public Not(LeagueStatement[] old)
         {
@@ -287,20 +339,53 @@ namespace League {
 
     public class EQ : BinaryBool, Bool {
         public override object Clone() {
-            return new EQ(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+            return new EQ(this.children);
         }
         public EQ(LeagueStatement[] statements) : base(statements) {}
     }
     public class GT : BinaryBool, Bool {
         public override object Clone() {
-            return new GT(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+            return new GT(this.children);
         }
         public GT(LeagueStatement[] statements) : base(statements) {}
     }
     public class LT : BinaryBool, Bool {
         public override object Clone() {
-            return new LT(this.children.Select(c => (LeagueStatement) c.Clone()).ToArray());
+            return new LT(this.children);
         }
         public LT(LeagueStatement[] statements) : base(statements) {}
+    }
+
+    public abstract class StringVal : LeagueStatement, StringType {
+    }
+
+    public class StringLit : StringVal, StringType, Leaf {
+        public string value;
+        public override object Clone() {
+            return new StringLit(this.value);
+        }
+
+        public string getValue() {
+            return this.value;
+        }
+
+        public StringLit(string litval) {
+            this.value = litval;
+        }
+    }
+
+    public class JsonString : StringVal, StringType, Leaf {
+        public string accessor;
+        public override object Clone() {
+            return new JsonString(this.accessor);
+        }
+
+        public string getValue() {
+            return this.accessor;
+        }
+
+        public JsonString(string accessor) {
+            this.accessor = accessor;
+        }
     }
 }

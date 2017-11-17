@@ -29,7 +29,7 @@ namespace League {
                     return new ValidReturn(interpretDouble(statement));
                 else return new TypeCheckException();
             }
-            catch (Exception e) {
+            catch (Exception) {
                 return new RunTimeException();
             }
 
@@ -70,16 +70,35 @@ namespace League {
         }
 
         private static bool interpretBool(LeagueStatement condition) {
+            LeagueStatement[] arguments = condition.getChildren();
             if(condition is BinaryBool) {
                 return interpretBinaryBool(condition);
             }
             if(condition is Not) {
-                return !interpretBool(condition);
+                return !interpretBool(arguments[0]);
             }
             if(condition is JsonBool) {
                 return interpretJsonBool(condition as JsonBool);
             }
-            return false; //throw an error?
+            if(condition is StringEQ) {
+                return interpretStringVal(arguments[0] as StringVal).Equals(interpretStringVal(arguments[1] as StringVal));
+            }
+            if(condition is IntEQ) {
+                return interpretDouble(arguments[0]) == interpretDouble(arguments[1]);
+            }
+            if(condition is GT) {
+                return interpretDouble(arguments[0]) > interpretDouble(arguments[1]);
+            }
+            if(condition is LT) {
+                return interpretDouble(arguments[0]) < interpretDouble(arguments[1]);
+            }
+            if(condition is True) return true;
+            if(condition is False) return false;
+            if(condition is BoolIf) {
+                if(interpretBool(arguments[0])) return interpretBool(arguments[1]);
+                else return interpretBool(arguments[2]);
+            }
+            throw new ArgumentException();
         }
 
         private static bool interpretBinaryBool(LeagueStatement statement) {
@@ -89,18 +108,6 @@ namespace League {
             }
             if(statement is Or) {
                 return interpretBool(arguments[0]) || interpretBool(arguments[1]);
-            }
-            if(statement is EQ) {
-                if(arguments[0] is StringVal && arguments[2] is StringVal) {
-                    return interpretStringVal(arguments[0] as StringVal).Equals(interpretStringVal(arguments[1] as StringVal));  
-                }
-                return interpretDouble(arguments[0]) == interpretDouble(arguments[1]);
-            }
-            if(statement is GT) {
-                return interpretDouble(arguments[0]) < interpretDouble(arguments[1]);
-            }
-            if(statement is LT) {
-                return interpretDouble(arguments[0]) > interpretDouble(arguments[1]);
             }
             throw new System.ArgumentException();
         }
@@ -116,7 +123,7 @@ namespace League {
         }
 
         private static double interpretJsonDouble(JsonDouble statement) {
-            return (int)match.SelectToken(statement.accessor);
+            return (double)match.SelectToken(statement.accessor);
         }
 
         private static bool interpretJsonBool(JsonBool statement) {

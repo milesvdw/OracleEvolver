@@ -12,14 +12,19 @@ namespace OracleEvolver {
     }
 
     //this will be our representation of a single evolved algorithm, calculator, or 'oracle'
-    public class Oracle {
+    public class Oracle : IEquatable<Oracle> {
         private LeagueStatement prophecy;
+        public bool perfect = false;
         public const double STRING_EVOLUTION_PROBABILITY = .5;
         public double fitness; //for now, this will simply be the percent of games correctly predicted
         public HashSet<double> answers = new HashSet<double>();
         private static int[] tmp = {0, 1};
         private static List<int> acceptableValues = new List<int>(tmp); //todo make this less terrifyingly bad code
 
+        public bool Equals(Oracle other) 
+        {
+            return this.prophecy.Equals(other.prophecy);
+        }
         /**
         * Gets a random double for a uniform distribution (uses Crypto RNG)
          */
@@ -55,7 +60,8 @@ namespace OracleEvolver {
             LeagueReturn prophesization = prophesize();
             if (prophesization is ValidReturn) {
                 double ret = (prophesization as ValidReturn).value;
-                if(ret == target) {
+                int answer =  ret > 1 ? 1 : ret < 0 ? 0 : ret > .5 ? 1 : 0; //an unfortunately complex way of getting around overflow errors
+                if(answer == target) {
                     this.fitness += 1;
                 }
                 answers.Add(ret);
@@ -65,12 +71,13 @@ namespace OracleEvolver {
         }
 
         public void normalizeFitness(double maximum_possible_fitness) {
-            if(answers.Count <= 1) {//no points for producing the same answer every time (e.g. just guessing the same team won over and over)
-                this.fitness = 0;
-                answers.Clear();
-                return;
+            if(fitness == maximum_possible_fitness) perfect = true;
+            if(answers.Count <= 1) {//less points for producing the same answer every time (e.g. just guessing the same team won over and over)
+                this.fitness = (this.fitness / 5) / maximum_possible_fitness;
+            } else {
+                this.fitness = this.fitness/maximum_possible_fitness;
             }
-            this.fitness = this.fitness/maximum_possible_fitness;
+            answers.Clear();
         }
 
         //this function will mutate the oracle's list of prophecies, and create a new oracle
@@ -94,28 +101,18 @@ namespace OracleEvolver {
         private LeagueStatement mutateExpressionTree(LeagueStatement expression, double mutationChance) {
             //this is the biggest sticking point in terms of generalizing the approach. How do you
             //generalize mutation??
-
-            bool isOldEq = expression is EQ;
             double roll = GetRandomPercent();
-
             List<LeagueStatement> newChildren = new List<LeagueStatement>();
             foreach(LeagueStatement child in expression.getChildren()) {
                 newChildren.Add(mutateExpressionTree(child, mutationChance));
             }
-            expression.setChildren(newChildren.ToArray());
-            LeagueStatement newExpression;
+            LeagueStatement newExpression = (LeagueStatement) expression.Clone();
+            newExpression.setChildren(newChildren.ToArray());
             if(roll < mutationChance) {//mutate!
-                newExpression = expression.mutate();
-            } else {
-                newExpression = (LeagueStatement) expression.Clone();
+                newExpression = newExpression.mutate();
             }
             
             return newExpression;
-        }
-
-        private LeagueStatement newString() {
-            LeagueStatement x = new StringLit("");
-            return x.randomStringType();
         }
 
         public void TranscribeProphecy() {

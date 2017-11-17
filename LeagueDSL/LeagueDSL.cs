@@ -17,10 +17,14 @@ namespace League {
     #endregion
 
     public abstract class LeagueStatement : ICloneable, IEquatable<LeagueStatement> {
-        public static string[] literalList = {"Win", "Fail"};
-        public static string[] stringAccessorList = {"teams[0].win", "teams[1].win"};
-        public static string[] doubleAccessorList = {"teams[0].teamId", "teams[1].teamId"};
-        public static string[] boolAccessorList = {"teams[0].firstRiftHerald", "teams[1].firstRiftHerald"};
+        public static string[] literalList = {"Win", 
+                                              "Fail"};
+        public static string[] stringAccessorList = {"teams[0].win", 
+                                                     "teams[1].win"};
+        public static string[] doubleAccessorList = {};//{"teams[0].teamId",
+                                                     //"teams[1].teamId"};
+        public static string[] boolAccessorList = {};//{"teams[0].firstRiftHerald", 
+                                                   //"teams[1].firstRiftHerald"};
 
         public void setChildren(LeagueStatement[] newChildren) {
             this.children = newChildren;
@@ -54,7 +58,6 @@ namespace League {
             return ((double)rand.Next(0, 100)) / 100 < DELETION_CHANCE;
         }
         public LeagueStatement mutate() {
-
             if(this is Number) {
                 if(shouldDelete()) return new IntVal(1);
                 return randomNumberType();
@@ -87,13 +90,13 @@ namespace League {
             throw new ArgumentException();
         }
 
-        private static string randomStringLit() {
-            int roll = rand.Next(1, literalList.Length);
+        protected static string randomStringLit() {
+            int roll = rand.Next(0, literalList.Length);
             return literalList[roll];
         }
 
         private static string randomAccessor(string[] list) {
-            int roll = rand.Next(1, list.Length);
+            int roll = rand.Next(0, list.Length);
             return list[roll];
         }
 
@@ -107,15 +110,17 @@ namespace League {
                 case 3:
                     return new BoolIf(children);
                 case 4:
-                    return new EQ(children);
+                    return new StringEQ(children);
                 case 5:
-                    return new GT(children);
+                    return new IntEQ(children);
                 case 6:
-                    return new LT(children);
+                    return new GT(children);
                 case 7:
-                    return new Not(children);
+                    return new LT(children);
                 case 8:
-                    return new JsonBool(randomAccessor(boolAccessorList));
+                    return new Not(children);
+                case 9:
+                    //return new JsonBool(randomAccessor(boolAccessorList));
                 default:
                     break;
             }
@@ -123,7 +128,7 @@ namespace League {
         }
 
         private LeagueStatement randomNumberType() {
-            int roll = rand.Next(1, 8);
+            int roll = rand.Next(1, 7);
             //note that this makes every kind of mutation equally likely...
             //whereas, ideally, mutations from one int to another should probably be the most likely
             //more investigation required.
@@ -141,7 +146,7 @@ namespace League {
                 case 6:
                     return new IntIf(children);
                 case 7:
-                    return new JsonDouble(randomAccessor(doubleAccessorList));
+                    //return new JsonDouble(randomAccessor(doubleAccessorList));
                 default:
                     break;
             }
@@ -149,7 +154,7 @@ namespace League {
         }
 
         protected void init(LeagueStatement[] statements, int degree) {
-            children = new LeagueStatement[degree];
+            this.children = new LeagueStatement[degree];
             Array.Copy(statements, children, degree);
         }
     }
@@ -197,8 +202,7 @@ namespace League {
     }
 
     public class IntVal : LeagueStatement, Number, Leaf {
-        public bool Equals(LeagueStatement other) {
-            Console.Write("HELLO WORLD");
+        public new bool Equals(LeagueStatement other) {
             if(other is IntVal) return (other as IntVal).value == this.value;
             else return false;
         }
@@ -259,7 +263,7 @@ namespace League {
     }
     public class True : LeagueStatement, Bool, Leaf {
         
-        public bool Equals(LeagueStatement other) {
+        public new bool Equals(LeagueStatement other) {
             return other is True;
         }
         public override object Clone() {
@@ -271,7 +275,7 @@ namespace League {
         public True() : base() {}
     }
     public class False : LeagueStatement, Bool, Leaf {
-        public bool Equals(LeagueStatement other) {
+        public new bool Equals(LeagueStatement other) {
             return other is False;
         }
         public override object Clone() {
@@ -337,23 +341,50 @@ namespace League {
         }
     }
 
-    public class EQ : BinaryBool, Bool {
+    public class StringEQ : LeagueStatement, Bool {
         public override object Clone() {
-            return new EQ(this.children);
+            return new StringEQ(this.children);
         }
-        public EQ(LeagueStatement[] statements) : base(statements) {}
+        public StringEQ(LeagueStatement[] old) : base() {
+            LeagueStatement[] statements = copyFromOld(old, 2);
+            if(!(statements[0] is StringType)) statements[0] = new StringLit(randomStringLit());
+            if(!(statements[1] is StringType)) statements[1] = new StringLit(randomStringLit());
+            init(statements, 2);
+        }
     }
-    public class GT : BinaryBool, Bool {
+    public class IntEQ : LeagueStatement, Bool {
+        public override object Clone() {
+            return new IntEQ(this.children);
+        }
+        public IntEQ(LeagueStatement[] old) : base() {
+;           LeagueStatement[] statements = copyFromOld(old, 2);
+            if(!(statements[0] is Number)) statements[0] = new IntVal(1);
+            if(!(statements[1] is Number)) statements[1] = new IntVal(1);
+            init(statements, 2);
+        }
+    }
+
+    public class GT : LeagueStatement, Bool {
         public override object Clone() {
             return new GT(this.children);
         }
-        public GT(LeagueStatement[] statements) : base(statements) {}
+        public GT(LeagueStatement[] old) : base() {
+;           LeagueStatement[] statements = copyFromOld(old, 2);
+            if(!(statements[0] is Number)) statements[0] = new IntVal(1);
+            if(!(statements[1] is Number)) statements[1] = new IntVal(1);
+            init(statements, 2);
+        }
     }
-    public class LT : BinaryBool, Bool {
+    public class LT : LeagueStatement, Bool {
         public override object Clone() {
             return new LT(this.children);
         }
-        public LT(LeagueStatement[] statements) : base(statements) {}
+        public LT(LeagueStatement[] old) : base() {
+;           LeagueStatement[] statements = copyFromOld(old, 2);
+            if(!(statements[0] is Number)) statements[0] = new IntVal(1);
+            if(!(statements[1] is Number)) statements[1] = new IntVal(1);
+            init(statements, 2);
+        }
     }
 
     public abstract class StringVal : LeagueStatement, StringType {

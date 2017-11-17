@@ -64,12 +64,14 @@ namespace OracleEvolver
                     return JObject.Parse(json).SelectTokens("matches").ToList(); //MILES TODO check that this is OK...
                 }
             }
-            return new List<JToken>();
         }
 
         public static void testOraclesFitness() {
+            oracles.ForEach(o => o.fitness = 0); // reset fitness for next generation
             List<JToken> matches = getMatches();
+            int count = 0;
             foreach(JToken match in matches[0].Children()) {
+                count++;
                 LeagueInterpreter.match = match;
                 double target = 0;
                 JToken team1 = match.SelectToken("teams[0]"); //MILES TODO refactor this so it can be passed in as a delegate
@@ -78,13 +80,11 @@ namespace OracleEvolver
                 else target = (string)team2.SelectToken("win") == "Win" ? 1 : 0;
                 Selection.ListwiseLocalCompetition.AssignFitness(oracles, target);
             }
-            oracles.ForEach(o => o.normalizeFitness(matches.Count));
+            oracles.ForEach(o => o.normalizeFitness(count));
         }
         public static void pruneOracles() {
             oracles = oracles.OrderBy(o => o.fitness).ToList();
             oracles.RemoveRange(0, oracles.Count - POPULATION);
-            oracles.RemoveRange(0, oracles.Count - POPULATION);
-            oracles.ForEach(o => o.fitness = 0); // reset fitness for next generation
         }
 
         public static void evolve() {
@@ -100,7 +100,7 @@ namespace OracleEvolver
                     mutateOracles();
                     testOraclesFitness();
                     pruneOracles();
-                    if(current_generation % 1 == 0) printOracles(); //only print every 10 generations
+                    if(current_generation % 1 == 0) printOracles(); //only print every x generations
                     //printOracles();
                 }
             }

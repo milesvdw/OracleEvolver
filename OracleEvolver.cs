@@ -12,7 +12,7 @@ namespace OracleEvolver
         private const string answerAccessor = "teams[0].win";
         private const int GENERATIONS = 5000;
         private const int REPRODUCTION_RATE = 3;
-        private const int POPULATION = 10;
+        private const int POPULATION = 30;
         private const bool USE_TRAINING_DATA = true;
         private static int current_generation;
         private const bool PRINT_VERBOSE = false;
@@ -55,30 +55,45 @@ namespace OracleEvolver
         }
 
         //returns a batch of 200 matches
-        private static List<JToken> getMatches() {
-            List<JToken> matches = new List<JToken>();
+        private static List<List<JToken>> getMatches() {
+            List<List<JToken>> allmatches = new List<List<JToken>>();
+            string[] testfiles = {"LeagueDSL/TrainingData/matches1.json", 
+                                  "LeagueDSL/TrainingData/matches2.json", 
+                                  "LeagueDSL/TrainingData/matches3.json", 
+                                  "LeagueDSL/TrainingData/matches4.json", 
+                                  "LeagueDSL/TrainingData/matches5.json", 
+                                  "LeagueDSL/TrainingData/matches6.json", 
+                                  "LeagueDSL/TrainingData/matches7.json", 
+                                  "LeagueDSL/TrainingData/matches8.json", 
+                                  "LeagueDSL/TrainingData/matches9.json", 
+                                  "LeagueDSL/TrainingData/matches10.json"};
+
             if(USE_TRAINING_DATA) {
-                using (StreamReader r = new StreamReader("LeagueDSL/TrainingData/matches1.json"))
-                {
-                    string json = r.ReadToEnd();
-                    return JObject.Parse(json).SelectTokens("matches").ToList(); //MILES TODO check that this is OK...
+                foreach(string file in testfiles) {
+                    using (StreamReader r = new StreamReader("LeagueDSL/TrainingData/matches1.json"))
+                    {
+                        string json = r.ReadToEnd();
+                        allmatches.Add(JObject.Parse(json).SelectTokens("matches").ToList()); //MILES TODO check that this is OK...
+                    }
                 }
             }
+            return allmatches;
         }
 
         public static void testOraclesFitness() {
             oracles.ForEach(o => o.fitness = 0); // reset fitness for next generation
-            List<JToken> matches = getMatches();
+            List<List<JToken>> allmatches = getMatches();
             int count = 0;
-            foreach(JToken match in matches[0].Children()) {
-                count++;
-                LeagueInterpreter.match = match;
-                double target = 0;
-                JToken team1 = match.SelectToken("teams[0]"); //MILES TODO refactor this so it can be passed in as a delegate
-                JToken team2 = match.SelectToken("teams[1]");
-                if((int) team1.SelectToken("teamId") == 100) target = (string)team1.SelectToken("win") == "Win" ? 1 : 0;
-                else target = (string)team2.SelectToken("win") == "Win" ? 1 : 0;
-                Selection.ListwiseLocalCompetition.AssignFitness(oracles, target);
+            foreach(List<JToken> matches in allmatches) {
+                foreach(JToken match in matches[0].Children()) {
+                    count++;
+                    LeagueInterpreter.match = match;
+                    double target = 0;
+                    JToken team1 = match.SelectToken("teams[0]"); //MILES TODO refactor this so it can be passed in as a delegate
+                    JToken team2 = match.SelectToken("teams[1]");
+                    target = (string) team1.SelectToken("win") == "Win" ? 1 : 0;
+                    Selection.ListwiseLocalCompetition.AssignFitness(oracles, target);
+                }
             }
             oracles.ForEach(o => o.normalizeFitness(count));
         }
@@ -100,7 +115,7 @@ namespace OracleEvolver
                     mutateOracles();
                     testOraclesFitness();
                     pruneOracles();
-                    if(current_generation % 1 == 0) printOracles(); //only print every x generations
+                    if(current_generation % 10 == 0) printOracles(); //only print every x generations
                     //printOracles();
                 }
             }

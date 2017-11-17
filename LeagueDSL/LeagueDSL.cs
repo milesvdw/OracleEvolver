@@ -17,14 +17,34 @@ namespace League {
     #endregion
 
     public abstract class LeagueStatement : ICloneable, IEquatable<LeagueStatement> {
-        public static string[] literalList = {"Win", 
-                                              "Fail"};
-        public static string[] stringAccessorList = {"teams[0].win", 
-                                                     "teams[1].win"};
-        public static string[] doubleAccessorList = {};//{"teams[0].teamId",
-                                                     //"teams[1].teamId"};
-        public static string[] boolAccessorList = {};//{"teams[0].firstRiftHerald", 
-                                                   //"teams[1].firstRiftHerald"};
+        public static string[] literalList = {};//{"Win", 
+                                              //"Fail"};
+        public static string[] stringAccessorList = {};//{"teams[0].win", 
+                                                     //"teams[1].win"};
+        public static string[] doubleAccessorList = {"teams[0].riftHeraldKills",
+                                                     "teams[1].riftHeraldKills",
+                                                     "teams[0].vilemawKills", 
+                                                     "teams[1].vilemawKills",
+                                                     "teams[0].inhibitorKills", 
+                                                     "teams[1].inhibitorKills",
+                                                     "teams[0].towerKills", 
+                                                     "teams[1].towerKills",
+                                                     "teams[0].dragonkills", 
+                                                     "teams[1].dragonKills",
+                                                     "team[0].teamId",
+                                                     "team[1].teamId"};
+        public static string[] boolAccessorList = {"teams[0].firstRiftHerald", 
+                                                   "teams[1].firstRiftHerald",
+                                                   "teams[0].firstDragon", 
+                                                   "teams[1].firstDragon",
+                                                   "teams[0].firstBaron", 
+                                                   "teams[1].firstBaron",
+                                                   "teams[0].firstInhibitor", 
+                                                   "teams[1].firstInhibitor",
+                                                   "teams[0].firstBlood", 
+                                                   "teams[1].firstBlood",
+                                                   "teams[0].firstTower", 
+                                                   "teams[1].firstTower"};
 
         public void setChildren(LeagueStatement[] newChildren) {
             this.children = newChildren;
@@ -40,8 +60,8 @@ namespace League {
         }
 
         protected static Random rand = new Random();
-        public static int MIN_COEFFICIENT = -5;
-        public static int MAX_COEFFICIENT = 5;
+        public static int MIN_COEFFICIENT = -1;
+        public static int MAX_COEFFICIENT = 100;
         public static double DELETION_CHANCE = .05;
         protected LeagueStatement[] children; // this is the array of child nodes
         public LeagueStatement[] getChildren() {
@@ -101,7 +121,7 @@ namespace League {
         }
 
         private LeagueStatement randomBoolType() {
-            int roll = rand.Next(1, 9);
+            int roll = rand.Next(1, 10);
             switch(roll) {  //this is, for now, unfortunately, a maintained list of every possible LeagueStatement
                 case 1:
                     return new And(children);
@@ -110,7 +130,7 @@ namespace League {
                 case 3:
                     return new BoolIf(children);
                 case 4:
-                    return new StringEQ(children);
+                    //return new StringEQ(children);
                 case 5:
                     return new IntEQ(children);
                 case 6:
@@ -120,7 +140,7 @@ namespace League {
                 case 8:
                     return new Not(children);
                 case 9:
-                    //return new JsonBool(randomAccessor(boolAccessorList));
+                    return new JsonBool(randomAccessor(boolAccessorList));
                 default:
                     break;
             }
@@ -128,7 +148,7 @@ namespace League {
         }
 
         private LeagueStatement randomNumberType() {
-            int roll = rand.Next(1, 7);
+            int roll = rand.Next(1, 8);
             //note that this makes every kind of mutation equally likely...
             //whereas, ideally, mutations from one int to another should probably be the most likely
             //more investigation required.
@@ -146,7 +166,7 @@ namespace League {
                 case 6:
                     return new IntIf(children);
                 case 7:
-                    //return new JsonDouble(randomAccessor(doubleAccessorList));
+                    return new JsonDouble(randomAccessor(doubleAccessorList));
                 default:
                     break;
             }

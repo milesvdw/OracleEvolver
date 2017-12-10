@@ -21,7 +21,18 @@ namespace League {
     }
 
     public static class LeagueInterpreter {
+
+
+
+        public static double GathersJsonData(LeagueStatement statement) {
+            return 
+               (statement is JsonBool 
+               || statement is JsonDouble 
+               || statement is JsonString) ? 1 : 0 + statement.getChildren().ToList().Sum(s => GathersJsonData(s));
+        }
+
         public static JToken match;
+
         public static LeagueReturn interpret(LeagueStatement statement) {
             try {
                 object ret = interpretDouble(statement);

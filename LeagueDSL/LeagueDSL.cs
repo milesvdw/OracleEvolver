@@ -17,34 +17,80 @@ namespace League {
     #endregion
 
     public abstract class LeagueStatement : ICloneable, IEquatable<LeagueStatement> {
-        public static string[] literalList = {};//{"Win", 
-                                              //"Fail"};
-        public static string[] stringAccessorList = {};//{"teams[0].win", 
-                                                     //"teams[1].win"};
-        public static string[] doubleAccessorList = {"teams[0].riftHeraldKills",
-                                                     "teams[1].riftHeraldKills",
-                                                     "teams[0].vilemawKills", 
-                                                     "teams[1].vilemawKills",
-                                                     "teams[0].inhibitorKills", 
-                                                     "teams[1].inhibitorKills",
-                                                     "teams[0].towerKills", 
-                                                     "teams[1].towerKills",
-                                                     "teams[0].dragonkills", 
-                                                     "teams[1].dragonKills",
-                                                     "team[0].teamId",
-                                                     "team[1].teamId"};
-        public static string[] boolAccessorList = {"teams[0].firstRiftHerald", 
-                                                   "teams[1].firstRiftHerald",
-                                                   "teams[0].firstDragon", 
-                                                   "teams[1].firstDragon",
-                                                   "teams[0].firstBaron", 
-                                                   "teams[1].firstBaron",
-                                                   "teams[0].firstInhibitor", 
-                                                   "teams[1].firstInhibitor",
-                                                   "teams[0].firstBlood", 
-                                                   "teams[1].firstBlood",
-                                                   "teams[0].firstTower", 
-                                                   "teams[1].firstTower"};
+        public static string[] literalList = {"GOLD", "SILVER", "BRONZE", "UNRANKED"};
+        public static string[] stringAccessorList = {"participants[0].highestAchievedSeasonTier",
+                                                     "participants[1].highestAchievedSeasonTier",
+                                                     "participants[2].highestAchievedSeasonTier",
+                                                     "participants[3].highestAchievedSeasonTier",
+                                                     "participants[4].highestAchievedSeasonTier",
+                                                     "participants[5].highestAchievedSeasonTier",
+                                                     "participants[6].highestAchievedSeasonTier",
+                                                     "participants[7].highestAchievedSeasonTier",
+                                                     "participants[8].highestAchievedSeasonTier",
+                                                     "participants[9].highestAchievedSeasonTier"};
+        public static string[] doubleAccessorList = {"team[0].teamId",
+                                                     "team[1].teamId",
+                                                     "teams[0].bans[0].pickTurn",
+                                                     "teams[0].bans[0].championId",
+                                                     "teams[0].bans[1].pickTurn",
+                                                     "teams[0].bans[1].championId",
+                                                     "teams[0].bans[2].pickTurn",
+                                                     "teams[0].bans[2].championId",
+                                                     "teams[0].bans[3].pickTurn",
+                                                     "teams[0].bans[3].championId",
+                                                     "teams[0].bans[4].pickTurn",
+                                                     "teams[0].bans[4].championId",
+                                                     "teams[1].bans[0].pickTurn",
+                                                     "teams[1].bans[0].championId",
+                                                     "teams[1].bans[1].pickTurn",
+                                                     "teams[1].bans[1].championId",
+                                                     "teams[1].bans[2].pickTurn",
+                                                     "teams[1].bans[2].championId",
+                                                     "teams[1].bans[3].pickTurn",
+                                                     "teams[1].bans[3].championId",
+                                                     "teams[1].bans[4].pickTurn",
+                                                     "teams[1].bans[4].championId",
+                                                     "participants[0].teamId",
+                                                     "participants[1].teamId",
+                                                     "participants[2].teamId",
+                                                     "participants[3].teamId",
+                                                     "participants[4].teamId",
+                                                     "participants[5].teamId",
+                                                     "participants[6].teamId",
+                                                     "participants[7].teamId",
+                                                     "participants[8].teamId",
+                                                     "participants[9].teamId",
+                                                     "participants[0].spell1Id",
+                                                     "participants[1].spell1Id",
+                                                     "participants[2].spell1Id",
+                                                     "participants[3].spell1Id",
+                                                     "participants[4].spell1Id",
+                                                     "participants[5].spell1Id",
+                                                     "participants[6].spell1Id",
+                                                     "participants[7].spell1Id",
+                                                     "participants[8].spell1Id",
+                                                     "participants[9].spell1Id",
+                                                     "participants[0].spell2Id",
+                                                     "participants[1].spell2Id",
+                                                     "participants[2].spell2Id",
+                                                     "participants[3].spell2Id",
+                                                     "participants[4].spell2Id",
+                                                     "participants[5].spell2Id",
+                                                     "participants[6].spell2Id",
+                                                     "participants[7].spell2Id",
+                                                     "participants[8].spell2Id",
+                                                     "participants[9].spell2Id",
+                                                     "participants[0].championId",
+                                                     "participants[1].championId",
+                                                     "participants[2].championId",
+                                                     "participants[3].championId",
+                                                     "participants[4].championId",
+                                                     "participants[5].championId",
+                                                     "participants[6].championId",
+                                                     "participants[7].championId",
+                                                     "participants[8].championId",
+                                                     "participants[9].championId"};
+        public static string[] boolAccessorList = {};
 
         public void setChildren(LeagueStatement[] newChildren) {
             this.children = newChildren;
@@ -61,8 +107,8 @@ namespace League {
 
         protected static Random rand = new Random();
         public static int MIN_COEFFICIENT = -1;
-        public static int MAX_COEFFICIENT = 100;
-        public static double DELETION_CHANCE = .05;
+        public static int MAX_COEFFICIENT = 500;
+        public static double DELETION_CHANCE = 0;
         protected LeagueStatement[] children; // this is the array of child nodes
         public LeagueStatement[] getChildren() {
             return children;
@@ -121,7 +167,7 @@ namespace League {
         }
 
         private LeagueStatement randomBoolType() {
-            int roll = rand.Next(1, 10);
+            int roll = rand.Next(1, 9);
             switch(roll) {  //this is, for now, unfortunately, a maintained list of every possible LeagueStatement
                 case 1:
                     return new And(children);
@@ -130,7 +176,7 @@ namespace League {
                 case 3:
                     return new BoolIf(children);
                 case 4:
-                    //return new StringEQ(children);
+                    return new StringEQ(children);
                 case 5:
                     return new IntEQ(children);
                 case 6:
@@ -140,7 +186,7 @@ namespace League {
                 case 8:
                     return new Not(children);
                 case 9:
-                    return new JsonBool(randomAccessor(boolAccessorList));
+                    //return new JsonBool(randomAccessor(boolAccessorList));
                 default:
                     break;
             }
@@ -148,7 +194,7 @@ namespace League {
         }
 
         private LeagueStatement randomNumberType() {
-            int roll = rand.Next(1, 8);
+            int roll = rand.Next(1, 14);
             //note that this makes every kind of mutation equally likely...
             //whereas, ideally, mutations from one int to another should probably be the most likely
             //more investigation required.
@@ -158,15 +204,27 @@ namespace League {
                 case 2:
                     return new Multiply(children);
                 case 3:
-                    return new Subtract(children);
+                    //return new Subtract(children);
                 case 4:
-                    return new Divide(children);
+                    //return new Divide(children);
                 case 5:
                     return new IntVal(rand.Next(MIN_COEFFICIENT, MAX_COEFFICIENT+1));
                 case 6:
                     return new IntIf(children);
                 case 7:
                     return new JsonDouble(randomAccessor(doubleAccessorList));
+                case 8:
+                    return new IntIf(children);
+                case 9:
+                    return new IntIf(children);
+                case 10:
+                    return new IntIf(children);
+                case 11:
+                    return new IntIf(children);
+                case 12:
+                    return new IntIf(children);
+                case 13:
+                    return new IntIf(children);
                 default:
                     break;
             }

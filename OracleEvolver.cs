@@ -8,18 +8,25 @@ using Newtonsoft.Json.Linq;
 namespace OracleEvolver
 {
     public static class OracleEvolverProgram {
-        private static List<Oracle> oracles = new List<Oracle>();
+        private static List<List<Oracle>> populations = new List<List<Oracle>>();
         private const string answerAccessor = "teams[0].win";
         private const int GENERATIONS = 5000;
         private const int REPRODUCTION_RATE = 3;
-        private const int POPULATION = 30;
+        private const int POPULATION = 1000;
+        private const int SUBGOAL_POPULATION_SIZE = 100;
+        private static Func<LeagueStatement, double>[] subgoals;
         private const bool USE_TRAINING_DATA = true;
         private static int current_generation;
         private const bool PRINT_VERBOSE = false;
-        private const int PRINT_FREQUENCY = 1;
-        private const MutationStrategy STRATEGY = MutationStrategy.Slow;
+        private const int PRINT_FREQUENCY = 10;
+        private const MutationStrategy STRATEGY = MutationStrategy.Normal;
         public static void Main() {
             seedPopulation();
+            subgoals = {League.ChecksValidChampion, 
+                        League.ChecksPlayerTiers, 
+                        League.LeagueInterpreter.GathersJsonData, 
+                        League.SmallTree,
+                        League.LargeTree};
             evolve();
 
             //UNCOMMENT TO UNIT TEST: 
@@ -27,9 +34,11 @@ namespace OracleEvolver
         }
         
         public static void seedPopulation() {
+            List<Oracle> oracles = new List<Oracle>();
             for(int i = 0; i < POPULATION; i ++) {
                 oracles.Add(new Oracle(new IntVal(1)));
             }
+            populations.Add(oracles);
         }
 
         public static void printOracles() {
@@ -115,7 +124,7 @@ namespace OracleEvolver
                     mutateOracles();
                     testOraclesFitness();
                     pruneOracles();
-                    if(current_generation % 10 == 0) printOracles(); //only print every x generations
+                    if(current_generation % PRINT_FREQUENCY == 0) printOracles(); //only print every x generations
                     //printOracles();
                 }
             }
